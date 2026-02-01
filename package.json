@@ -1,0 +1,13 @@
+{
+  "name": "boardly",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "packageManager": "npm@11.8.0",
+  "license": "ISC",
+  "private": true,
+  "workspaces": [],
+  "devDependencies": {
+    "turbo": "^2.8.1"
+  }
+}
