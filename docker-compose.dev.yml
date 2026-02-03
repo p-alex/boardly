@@ -1,0 +1,15 @@
+services:
+  web:
+    container_name: client
+    image: boardly-client:dev
+    build:
+      context: ./apps/client
+      target: dev
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./apps/client:/app/apps/client
+      - /app/apps/client/node_modules

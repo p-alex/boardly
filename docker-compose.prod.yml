@@ -1,0 +1,10 @@
+services:
+  web:
+    container_name: boardly-client-prod
+    image: boardly-client:prod
+    build:
+      context: ./apps/client
+      target: prod
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
