@@ -1,6 +1,6 @@
+name: boardly-prod
 services:
   web:
-    container_name: boardly-client-prod
     image: boardly-client:prod
     build:
       context: ./apps/client

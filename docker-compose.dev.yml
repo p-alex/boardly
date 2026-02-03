@@ -1,6 +1,6 @@
+name: boardly-dev
 services:
   web:
-    container_name: client
     image: boardly-client:dev
     build:
       context: ./apps/client
