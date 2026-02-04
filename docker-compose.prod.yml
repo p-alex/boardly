@@ -3,8 +3,8 @@ services:
   web:
     image: boardly-client:prod
     build:
-      context: ./apps/client
+      context: .
       target: prod
-      dockerfile: Dockerfile
+      dockerfile: ./apps/client/Dockerfile
     ports:
       - "5173:80"

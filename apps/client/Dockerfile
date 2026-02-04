@@ -1,33 +1,29 @@
-# STAGE 1: BASE (common setup)
-FROM node:25-alpine AS base
+FROM node:25-alpine3.23 AS base
 
-RUN addgroup -S app && adduser -S app -G app
+WORKDIR /app
 
-WORKDIR /app/apps/client
+COPY package.json package-lock.json ./
 
-COPY package*.json ./
+COPY apps/client/package.json apps/client/package-lock.json ./apps/client/
 
-RUN chown -R app:app /app
-
-USER app
-
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-# STAGE 2: development
 FROM base AS dev
+
+WORKDIR /app/apps/client
 
 EXPOSE 5173
 
 CMD ["npm", "run", "dev", "--", "--host"]
 
-# STAGE 3: build
 FROM base AS builder
+
+WORKDIR /app/apps/client
 
 RUN npm run build
 
-# STAGE 4: production
 FROM nginx:alpine AS prod
 
 COPY --from=builder /app/apps/client/dist /usr/share/nginx/html

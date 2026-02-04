@@ -3,13 +3,20 @@ services:
   web:
     image: boardly-client:dev
     build:
-      context: ./apps/client
+      context: .
       target: dev
-      dockerfile: Dockerfile
+      dockerfile: ./apps/client/Dockerfile
     ports:
       - "5173:5173"
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./apps/client:/app/apps/client
-      - /app/apps/client/node_modules
+    develop:
+      watch:
+        - action: rebuild
+          path: ./apps/client/package.json
+          target: package.json
+        - action: rebuild
+          path: ./apps/client/package-lock.json
+          target: package-lock.json
