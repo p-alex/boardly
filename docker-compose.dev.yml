@@ -20,3 +20,21 @@ services:
         - action: rebuild
           path: ./apps/client/package-lock.json
           target: package-lock.json
+  server:
+    image: boardly-server:dev
+    build:
+      context: .
+      target: dev
+      dockerfile: ./apps/server/Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./apps/server:/app/apps/server
+    develop:
+      watch:
+        - action: rebuild
+          path: ./apps/server/package.json
+          target: package.json
+        - action: rebuild
+          path: ./apps/server/package-lock.json
+          target: package-lock.json
