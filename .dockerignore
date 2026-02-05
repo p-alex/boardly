@@ -1,4 +1,7 @@
 node_modules
-.turbo
 dist
-build
+.vite
+.git
+.env
+coverage
+.turbo
