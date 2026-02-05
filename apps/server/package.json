@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "CHOKIDAR_USEPOLLING=true CHOKIDAR_INTERVAL=100 tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },
