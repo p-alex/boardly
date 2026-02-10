@@ -4,3 +4,4 @@ dist
 build
 coverage
 .turbo
+tsconfig.tsbuildinfo

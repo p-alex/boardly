@@ -1,0 +1,26 @@
+{
+  "name": "@boardly/shared",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    "./dtos/auth": {
+      "types": "./dist/dtos/auth/index.d.ts",
+      "import": "./dist/dtos/auth/index.js"
+    },
+    "./fieldValidations": {
+      "types": "./dist/fieldValidation/index.d.ts",
+      "import": "./dist/fieldValidation/index.js"
+    }
+  },
+  "keywords": [],
+  "type": "module",
+  "dependencies": {
+    "zod": "^4.3.6"
+  }
+}

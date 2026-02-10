@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "CHOKIDAR_USEPOLLING=true CHOKIDAR_INTERVAL=100 tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "db:dev": "npx prisma migrate dev && npx prisma generate",
+    "db:deploy": "npx prisma migrate deploy && npx prisma generate"
   },
   "keywords": [],
   "author": "",

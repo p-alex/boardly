@@ -3,47 +3,28 @@ FROM node:25-alpine AS base
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-
 COPY apps/server/package.json ./apps/server/
+COPY packages/shared/package.json ./packages/shared/
 
 RUN npm ci
 
-COPY . .
+COPY apps/server ./apps/server
+COPY packages/shared ./packages/shared
+
+FROM base AS builder
+
+WORKDIR /app/packages/shared
+
+RUN npm run build
 
 FROM base AS dev
+
+WORKDIR /app
+
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
 WORKDIR /app/apps/server
 
 EXPOSE 5000
 
 CMD ["npm", "run", "dev"]
-
-FROM base AS builder
-
-WORKDIR /app/apps/server
-
-CMD ["npm", "run", "build"]
-
-FROM node:25-alpine AS prod
-
-WORKDIR /app
-
-# Create non-root user
-RUN addgroup -S app && adduser -S app -G app
-
-COPY apps/server/package.json ./
-
-# Copy only what's needed from base
-COPY --from=builder /app/apps/server/dist ./dist
-
-RUN npm install --omit=dev
-
-# Make non-root user owner
-RUN chown -R app:app /app
-
-# Switch to non-root
-USER app
-
-EXPOSE 5000
-
-CMD ["node", "dist/index.js"]

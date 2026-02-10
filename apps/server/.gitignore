@@ -4,3 +4,6 @@ dist
 build
 coverage
 .turbo
+/src/generated/prisma
+/generated/
+prisma/migrations

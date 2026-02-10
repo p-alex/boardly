@@ -12,6 +12,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./apps/client:/app/apps/client
+      - ./packages:/app/packages
     develop:
       watch:
         - action: rebuild
@@ -20,6 +21,8 @@ services:
         - action: rebuild
           path: ./apps/client/package-lock.json
           target: package-lock.json
+    depends_on:
+      - server
   server:
     image: boardly-server:dev
     build:
