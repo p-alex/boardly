@@ -3,10 +3,12 @@ FROM node:25-alpine3.23 AS base
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
 COPY apps/client/package.json ./apps/client/
 
 RUN npm ci
 
+COPY packages/shared ./packages/shared/
 COPY apps/client ./apps/client/
 
 FROM base AS builder

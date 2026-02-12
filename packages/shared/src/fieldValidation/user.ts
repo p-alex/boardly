@@ -9,16 +9,12 @@ export const usernameSchema = string().check(
   }),
 );
 
-export const emailSchema = email({ error: "Email must be a valid" }).check(
+export const emailSchema = email({ error: "Email must be valid" }).check(
   maxLength(254, "Email must be at most 254 characters long"),
   minLength(6, "Email must be at least 6 characters long"),
 );
 
 export const passwordSchema = string().check(
-  minLength(8, "Password must be at least 8 characters long"),
-  maxLength(128, "Password must be at most 128 characters long"),
-  regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?@#$%]).+$/, {
-    error:
-      "Password must contain at least one uppercase and lowercase letter, a number and a symbol (!?@#$%)",
-  }),
+  minLength(12, "Password must be between 12-64 characters long"),
+  maxLength(64, "Password must be between 12-64 characters long"),
 );

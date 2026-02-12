@@ -12,11 +12,9 @@
   ],
   "scripts": {
     "docker:dev": "docker compose -f docker-compose.dev.yml up",
-    "docker:build": "docker compose -f docker-compose.dev.yml up --build",
+    "docker:dev-build": "docker compose -f docker-compose.dev.yml up --build",
     "docker:dev-stop": "docker compose -f docker-compose.dev.yml stop",
-    "docker:prod": "docker compose -f docker-compose.prod.yml up --build",
-    "docker:prod-stop": "docker compose -f docker-compose.prod.yml stop",
-    "docker:stop": "npm run docker:prod-stop && npm run docker:dev-stop"
+    "count-lines": "scc ./apps/client/src ./apps/server/src ./packages/shared/src"
   },
   "devDependencies": {
     "turbo": "^2.8.1"

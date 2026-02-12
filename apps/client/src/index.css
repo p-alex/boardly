@@ -23,3 +23,32 @@
   src: url("/fonts/Inter-Bold.woff2");
   font-weight: 700;
 }
+
+html {
+  min-height: 100vh;
+}
+
+body {
+  min-height: 100vh;
+  @apply bg-siteBg text-text;
+}
+
+* {
+  font-family: Inter, sans-serif;
+}
+
+@theme {
+  --color-primary: #618985;
+  --color-siteBg: #f3f3f3;
+  --color-ui-bg: #ffffff;
+  --color-ui-border: #d7d7d7;
+  --color-text: #333;
+  --color-textMuted: #666;
+  --color-error: #c3423f;
+  --radius-ui: 5px;
+  --radius-ui-container: 8px;
+}
+
+a {
+  @apply text-primary underline font-semibold;
+}
