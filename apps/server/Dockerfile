@@ -27,4 +27,4 @@ WORKDIR /app/apps/server
 
 EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "docker:dev"]

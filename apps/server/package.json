@@ -4,7 +4,8 @@
   "description": "",
   "private": true,
   "scripts": {
-    "dev": "CHOKIDAR_USEPOLLING=true CHOKIDAR_INTERVAL=100 tsx watch src/index.ts",
+    "docker:dev": "CHOKIDAR_USEPOLLING=true CHOKIDAR_INTERVAL=100 tsx watch src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "db:dev": "npx prisma migrate dev && npx prisma generate",
