@@ -8,8 +8,8 @@ services:
       dockerfile: ./apps/client/Dockerfile
     ports:
       - "5173:5173"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+    env_file:
+      - .env.client
     volumes:
       - ./apps/client:/app/apps/client
       - ./packages:/app/packages
@@ -20,6 +20,12 @@ services:
           target: package.json
         - action: rebuild
           path: ./apps/client/package-lock.json
+          target: package-lock.json
+        - action: rebuild
+          path: ./packages/shared/package.json
+          target: package.json
+        - action: rebuild
+          path: ./packages/shared/package-lock.json
           target: package-lock.json
     depends_on:
       - server
@@ -33,6 +39,9 @@ services:
       - "5000:5000"
     volumes:
       - ./apps/server:/app/apps/server
+      - ./packages:/app/packages
+    env_file:
+      - .env.server
     develop:
       watch:
         - action: rebuild
@@ -41,3 +50,29 @@ services:
         - action: rebuild
           path: ./apps/server/package-lock.json
           target: package-lock.json
+        - action: sync+restart
+          path: ./apps/server/src/prisma/schema.prisma
+          target: schema.prisma
+        - action: sync+restart
+          path: ./apps/server/src/prisma.config.ts
+          target: prisma.config.ts
+        - action: rebuild
+          path: ./packages/shared/package.json
+          target: package.json
+        - action: rebuild
+          path: ./packages/shared/package-lock.json
+          target: package-lock.json
+    depends_on:
+      - db
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    restart: always
+    env_file:
+      - .env.db
+    volumes:
+      - boardly-data:/var/lib/postgresql/data
+
+volumes:
+  boardly-data:
