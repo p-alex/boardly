@@ -1,4 +1,4 @@
-import { refine, string, object } from "zod/v4-mini";
+import { string, object, superRefine } from "zod/v4-mini";
 import { userFieldValidations } from "@boardly/shared/fieldValidations";
 
 const signUpFormSchema = object({
@@ -7,9 +7,14 @@ const signUpFormSchema = object({
   password: userFieldValidations.passwordSchema,
   confirmPassword: string(),
 }).check(
-  refine((data) => data.password === data.confirmPassword, {
-    error: "Passwords must match",
-    path: ["confirmPassword"],
+  superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Passwords must match",
+        path: ["confirmPassword"],
+      });
+    }
   }),
 );
 
