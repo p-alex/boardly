@@ -5,3 +5,6 @@ build
 coverage
 .turbo
 tsconfig.tsbuildinfo
+.env.client
+.env.server
+.env.db
