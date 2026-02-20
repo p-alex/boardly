@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
@@ -10,5 +9,5 @@
     "target": "ESNext",
     "module": "NodeNext"
   },
-  "exclude": ["node_modules", "**/*.test.ts", "dist"]
+  "exclude": ["node_modules", "**/*.test.ts", "dist", "prisma.config.ts", "generated*"]
 }

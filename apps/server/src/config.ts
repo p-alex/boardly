@@ -2,8 +2,6 @@ export type EmailEncryptionSecretVersion = "V1" | "V2";
 export type EmailHashSecretVersion = "V1" | "V2";
 export type PasswordPepperVersion = "V1" | "V2";
 
-// TODO: "push changes correctly to github"
-
 export interface IEnv {
   DATABASE_URL: string;
   ENCRYPTION_SECRETS: {
