@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma_client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OAuthProvider {
+  GOOGLE
+}
+
+enum SecretVersions {
+  V1
+  V2
+}
+
+model User {
+  id                              String         @id
+  username                        String         @unique
+  encrypted_email                 String?
+  hashed_email                    String?        @unique
+  email_encryption_secret_version SecretVersions @default(V1)
+  email_hash_secret_version       SecretVersions @default(V1)
+  email_verified                  Boolean        @default(false)
+  updated_at                      DateTime       @updatedAt
+  created_at                      DateTime       @default(now())
+
+  passwordAuth UserPasswordAuth?
+
+  @@map("users")
+}
+
+model UserPasswordAuth {
+  user_id                 String         @id
+  password_hash           String
+  password_pepper_version SecretVersions @default(V1)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_password_auth")
+}
