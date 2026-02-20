@@ -8,6 +8,8 @@ import { PrismaTsx } from "../../services/index.js";
 import { PrismaClient } from "../../../../generated/prisma_client/client.js";
 import { mockUser } from "../../../__fixtures__/user/mockUser.js";
 import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
+import { PwnedPasswordCheckerService } from "../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
+import ValidationException from "../../../exceptions/ValidationException.js";
 
 describe("SignUpUsecase.ts (unit)", () => {
   let signUpUsecase: SignUpUsecase;
@@ -15,6 +17,7 @@ describe("SignUpUsecase.ts (unit)", () => {
   let userCreatorServiceMock: Mocked<UserCreatorService>;
   let userEmailFinderServiceMock: UserEmailFinderService;
   let userEmailRotationServiceMock: UserEmailRotationService;
+  let pwnedPasswordCheckerServiceMock: Mocked<PwnedPasswordCheckerService>;
 
   let prismaMock: Mocked<PrismaClient>;
 
@@ -43,10 +46,15 @@ describe("SignUpUsecase.ts (unit)", () => {
       execute: vi.fn(),
     } as unknown as Mocked<UserEmailRotationService>;
 
+    pwnedPasswordCheckerServiceMock = {
+      execute: vi.fn(),
+    } as unknown as Mocked<PwnedPasswordCheckerService>;
+
     signUpUsecase = new SignUpUsecase(
       userCreatorServiceMock,
       userEmailFinderServiceMock,
       userEmailRotationServiceMock,
+      pwnedPasswordCheckerServiceMock,
       prismaMock,
     );
   });
@@ -70,7 +78,7 @@ describe("SignUpUsecase.ts (unit)", () => {
     expect(prismaTsxMock.user.findUnique).toHaveBeenCalledTimes(1);
   });
 
-  it("throws AlreadyExistsException if a user with the  same email already exists", async () => {
+  it("throws AlreadyExistsException if a user with the same email already exists", async () => {
     (userEmailFinderServiceMock.execute as Mock).mockResolvedValue({
       user: mockUser,
       foundWithInactiveSecret: false,
@@ -107,6 +115,18 @@ describe("SignUpUsecase.ts (unit)", () => {
     });
 
     expect(userEmailRotationServiceMock.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws if password has been pwned", async () => {
+    pwnedPasswordCheckerServiceMock.execute.mockResolvedValue(true);
+
+    await expect(
+      signUpUsecase.execute({
+        email: "email@email.com",
+        password: "password",
+        username: "username",
+      }),
+    ).rejects.toThrow(ValidationException);
   });
 
   it("creates the user correctly", async () => {

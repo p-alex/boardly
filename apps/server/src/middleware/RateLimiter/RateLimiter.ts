@@ -63,8 +63,6 @@ export class RateLimiter implements IMiddleware {
 
       this._limitedIps.set(key, limitedIp);
 
-      console.log(this._limitedIps);
-
       return { isOk: true };
     };
   };
