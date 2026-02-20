@@ -70,6 +70,10 @@ export class CryptoUtil {
   hmacSHA256 = (text: string, secret: string) => {
     return crypto_js.HmacSHA256(text, secret).toString(crypto_js.enc.Hex);
   };
+
+  sha1 = (text: string) => {
+    return crypto_js.SHA1(text).toString(crypto_js.enc.Hex);
+  };
 }
 
 const cryptoUtil = new CryptoUtil();
