@@ -21,6 +21,10 @@
       "types": "./dist/dtos/user/index.d.ts",
       "import": "./dist/dtos/user/index.js"
     },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
     "./fieldValidations": {
       "types": "./dist/fieldValidation/index.d.ts",
       "import": "./dist/fieldValidation/index.js"
@@ -29,6 +33,11 @@
   "keywords": [],
   "type": "module",
   "dependencies": {
+    "argon2": "^0.44.0",
+    "crypto-js": "^4.2.0",
     "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2"
   }
 }
