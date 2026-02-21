@@ -11,7 +11,7 @@ function SignUpPage() {
   return (
     <CenterLayout>
       <FloatingContainer>
-        <SignUpForm signUpRequest={(data) => Promise.resolve(console.log(data))} />
+        <SignUpForm />
       </FloatingContainer>
     </CenterLayout>
   );

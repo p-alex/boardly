@@ -5,7 +5,10 @@ import AlreadyExistsException from "./exceptions/AlreadyExistsException.js";
 import TooManyRequestsException from "./exceptions/TooManyRequestsException.js";
 
 function handleServerError(error: any, res: Response) {
-  let errorResponse: ServerErrorResponseDto = { status: 500, message: "Internal server error" };
+  let errorResponse: ServerErrorResponseDto = {
+    status: 500,
+    message: "Internal server error. Try again later.",
+  };
 
   if (error instanceof ValidationException) {
     errorResponse.status = 400;

@@ -9,7 +9,7 @@ import rateLimiter from "../../middleware/RateLimiter/RateLimiter.js";
 const authRouter = Router();
 
 authRouter.post(
-  "/sign-up",
+  "/password-sign-up",
   expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 10 })),
   expressMiddlewareAdapter.adapt(resourceValidator.setup({ schema: signUpRequestDtoSchema })),
   expressControllerAdapter.adapt(emailSignUpController),

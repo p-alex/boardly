@@ -11,7 +11,7 @@ describe("handleServerError.ts (unit)", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith({
-      message: "Internal server error",
+      message: "Internal server error. Try again later.",
       status: 500,
     } as ServerErrorResponseDto);
   });
