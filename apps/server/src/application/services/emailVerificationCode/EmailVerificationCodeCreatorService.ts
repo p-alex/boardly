@@ -13,7 +13,7 @@ export class EmailVerificationCodeCreatorService implements IService {
 
   execute = async (tsx: PrismaTsx | null, data: { user_id: string }) => {
     const dbClient = tsx ? tsx : prisma;
-    const code = this._cryptoUtil.generateCode(8);
+    const code = this._cryptoUtil.generateCode(6);
 
     const emailVerificationCode = this._emailVerificationCodeFactory.create({
       user_id: data.user_id,

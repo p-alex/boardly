@@ -46,7 +46,7 @@ describe("EmailVerificationCodeCreatorService", () => {
 
     const result = await service.execute(null, { user_id });
 
-    expect(cryptoUtil.generateCode).toHaveBeenCalledWith(8);
+    expect(cryptoUtil.generateCode).toHaveBeenCalledWith(6);
 
     expect(factory.create).toHaveBeenCalledWith({
       user_id,
