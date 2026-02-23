@@ -7,7 +7,13 @@ export class ExpressControllerAdapter {
   adapt = (controller: IController) => {
     return async (req: Request, res: Response) => {
       try {
-        const { result, code } = await controller.handle(getHttpRequest(req));
+        const { result, code, redirect_to } = await controller.handle(getHttpRequest(req));
+
+        if (redirect_to) {
+          res.redirect(redirect_to);
+          return;
+        }
+
         res.status(code);
         res.json(result);
       } catch (error) {

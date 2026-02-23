@@ -5,4 +5,5 @@ export const mockRes = {
   status: vi.fn(),
   json: vi.fn(),
   setHeader: vi.fn(),
+  redirect: vi.fn(),
 } as unknown as Response;

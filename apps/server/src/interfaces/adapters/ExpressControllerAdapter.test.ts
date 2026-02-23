@@ -10,7 +10,7 @@ describe("ExpressControllerAdapter.ts (unit)", () => {
 
   beforeEach(() => {
     mockController = {
-      handle: vi.fn().mockReturnValue({
+      handle: vi.fn().mockResolvedValue({
         code: 200,
         result: { test: "test" },
       } as ControllerResponse<{
@@ -38,5 +38,18 @@ describe("ExpressControllerAdapter.ts (unit)", () => {
 
     expect(mockRes.status).toHaveBeenCalled();
     expect(mockRes.json).toHaveBeenCalled();
+  });
+
+  it("should redirect if controller gives redirect_to param", async () => {
+    mockController.handle = vi.fn().mockResolvedValue({
+      code: 200,
+      result: null,
+      redirect_to: "url",
+    } as ControllerResponse<null>);
+    const handler = expressControllerAdapter.adapt(mockController);
+
+    await handler(mockReq, mockRes);
+
+    expect(mockRes.redirect).toHaveBeenCalledWith("url");
   });
 });
