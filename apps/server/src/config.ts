@@ -5,6 +5,7 @@ export type PasswordPepperVersion = "V1" | "V2";
 export interface IEnv {
   NODE_ENV: "development" | "production";
   DATABASE_URL: string;
+  CLIENT_BASE_URL: string;
   ENCRYPTION_SECRETS: {
     EMAIL: Record<EmailEncryptionSecretVersion, string> & {
       VERSIONS: EmailEncryptionSecretVersion[];
@@ -33,6 +34,7 @@ export interface IEnv {
 
 export const env: IEnv = {
   NODE_ENV: process.env.NODE_ENV! as "development" | "production",
+  CLIENT_BASE_URL: process.env.CLIENT_BASE_URL!,
   DATABASE_URL: process.env.DATABASE_URL!,
   ENCRYPTION_SECRETS: {
     EMAIL: {

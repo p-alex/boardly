@@ -1,6 +1,7 @@
 import signUpUsecase, {
   SignUpUsecase,
 } from "../../../application/usecases/SignUpUsecase/SignUpUsecase.js";
+import { env } from "../../../config.js";
 import { HttpRequest } from "../../adapters/index.js";
 import { ControllerResponse, IController } from "./index.js";
 import { SignUpRequestDtoSchema, SignUpResponseDtoSchema } from "@boardly/shared/dtos/auth";
@@ -15,7 +16,7 @@ export class EmailSignUpController implements IController {
 
     const result = await this._signUpUsecase.execute(data);
 
-    return { code: 201, result };
+    return { code: 201, result, redirect_to: env.CLIENT_BASE_URL + "/verify-email" };
   };
 }
 
