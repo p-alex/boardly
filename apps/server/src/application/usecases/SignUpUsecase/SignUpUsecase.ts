@@ -27,9 +27,6 @@ export class SignUpUsecase {
     private readonly _userEmailFinderService: UserEmailFinderService,
     private readonly _userEmailRotationService: UserEmailRotationService,
     private readonly _pwnedPasswordCheckerService: PwnedPasswordCheckerService,
-    private readonly _emailVerificationCodeCreatorService: EmailVerificationCodeCreatorService,
-    private readonly _mailer: Mailer,
-    private readonly _getEmailVerificationTemplate: GetEmailVerificationTemplate,
     private readonly _prisma: PrismaClient,
   ) {}
 
@@ -65,12 +62,6 @@ export class SignUpUsecase {
 
       const { createdUser } = await this._userCreatorService.execute(tsx, data);
 
-      const { code } = await this._emailVerificationCodeCreatorService.execute(tsx, {
-        user_id: createdUser.id,
-      });
-
-      await this._mailer.send(this._getEmailVerificationTemplate(code), data.email);
-
       return null;
     });
   };
@@ -81,9 +72,6 @@ const signUpUsecase = new SignUpUsecase(
   userEmailFinderService,
   userEmailRotationService,
   pwnedPasswordCheckerService,
-  emailVerificationCodeCreatorService,
-  mailer,
-  getEmailVerificationTemplate,
   prisma,
 );
 

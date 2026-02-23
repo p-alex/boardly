@@ -15,7 +15,7 @@ export class EmailSignUpController implements IController {
 
     await this._signUpUsecase.execute(data);
 
-    return { code: 201, result: { redirect_to: "/verify-email" } };
+    return { code: 201, result: null };
   };
 }
 

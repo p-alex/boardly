@@ -30,6 +30,6 @@ describe("EmailSignUpController.ts (unit)", () => {
   it("returns correctly", async () => {
     const result = await emailSignUpController.handle(mockHttpRequest);
 
-    expect(result).toEqual({ code: 201, result: { redirect_to: "/verify-email" } });
+    expect(result).toEqual({ code: 201, result: null });
   });
 });

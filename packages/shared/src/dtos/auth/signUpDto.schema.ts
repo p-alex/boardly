@@ -10,13 +10,11 @@ const signUpRequestDtoSchema = object({
   }),
 });
 
-const signUpResponseDtoSchema = object({
-  redirect_to: string,
-});
+const signUpResponseDtoSchema = null;
 
 type SignUpRequestDtoSchema = typeof signUpRequestDtoSchema._zod.output;
 
-type SignUpResponseDtoSchema = typeof signUpResponseDtoSchema._zod.output;
+type SignUpResponseDtoSchema = typeof signUpResponseDtoSchema;
 
 export {
   signUpRequestDtoSchema,
