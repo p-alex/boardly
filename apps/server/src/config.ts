@@ -3,6 +3,7 @@ export type EmailHashSecretVersion = "V1" | "V2";
 export type PasswordPepperVersion = "V1" | "V2";
 
 export interface IEnv {
+  NODE_ENV: "development" | "production";
   DATABASE_URL: string;
   ENCRYPTION_SECRETS: {
     EMAIL: Record<EmailEncryptionSecretVersion, string> & {
@@ -31,6 +32,7 @@ export interface IEnv {
 }
 
 export const env: IEnv = {
+  NODE_ENV: process.env.NODE_ENV! as "development" | "production",
   DATABASE_URL: process.env.DATABASE_URL!,
   ENCRYPTION_SECRETS: {
     EMAIL: {
