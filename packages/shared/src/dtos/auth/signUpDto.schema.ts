@@ -1,5 +1,6 @@
 import { object } from "zod/v4-mini";
 import { emailSchema, passwordSchema, usernameSchema } from "../../fieldValidation/user.js";
+import { string } from "zod";
 
 const signUpRequestDtoSchema = object({
   body: object({
@@ -9,11 +10,13 @@ const signUpRequestDtoSchema = object({
   }),
 });
 
-const signUpResponseDtoSchema = null;
+const signUpResponseDtoSchema = object({
+  redirect_to: string,
+});
 
 type SignUpRequestDtoSchema = typeof signUpRequestDtoSchema._zod.output;
 
-type SignUpResponseDtoSchema = typeof signUpResponseDtoSchema;
+type SignUpResponseDtoSchema = typeof signUpResponseDtoSchema._zod.output;
 
 export {
   signUpRequestDtoSchema,
