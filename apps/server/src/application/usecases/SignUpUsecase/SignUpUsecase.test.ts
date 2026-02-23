@@ -10,6 +10,10 @@ import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.j
 import { PwnedPasswordCheckerService } from "../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
 import ValidationException from "../../../exceptions/ValidationException.js";
 import { EmailVerificationCodeCreatorService } from "../../services/emailVerificationCode/EmailVerificationCodeCreatorService.js";
+import Mailer from "../../../Mailer/Mailer.js";
+import getEmailVerificationTemplate, {
+  GetEmailVerificationTemplate,
+} from "../../../Mailer/emailTemplates/emailVerificationTemplate.js";
 
 describe("SignUpUsecase.ts (unit)", () => {
   let signUpUsecase: SignUpUsecase;
@@ -19,6 +23,7 @@ describe("SignUpUsecase.ts (unit)", () => {
   let userEmailRotationServiceMock: UserEmailRotationService;
   let pwnedPasswordCheckerServiceMock: Mocked<PwnedPasswordCheckerService>;
   let emailVerificationCodeCreatorServiceMock: Mocked<EmailVerificationCodeCreatorService>;
+  let mailer: Mocked<Mailer>;
 
   let prismaMock: Mocked<PrismaClient>;
 
@@ -55,12 +60,18 @@ describe("SignUpUsecase.ts (unit)", () => {
       execute: vi.fn().mockResolvedValue({ code: "code" }),
     } as unknown as Mocked<EmailVerificationCodeCreatorService>;
 
+    mailer = {
+      send: vi.fn(),
+    } as unknown as Mocked<Mailer>;
+
     signUpUsecase = new SignUpUsecase(
       userCreatorServiceMock,
       userEmailFinderServiceMock,
       userEmailRotationServiceMock,
       pwnedPasswordCheckerServiceMock,
       emailVerificationCodeCreatorServiceMock,
+      mailer,
+      getEmailVerificationTemplate,
       prismaMock,
     );
   });
@@ -146,6 +157,25 @@ describe("SignUpUsecase.ts (unit)", () => {
 
     expect(userCreatorServiceMock.execute).toHaveBeenCalledWith(prismaTsxMock, data);
     expect(userCreatorServiceMock.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends a verification email with the created verification code to the user's inbox", async () => {
+    const data = {
+      email: "email@email.com",
+      password: "password",
+      username: "username",
+    };
+
+    await signUpUsecase.execute(data);
+
+    expect(mailer.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: "Email verification",
+        text: "Verification code: code",
+        html: "Verification code: code",
+      }),
+      "email@email.com",
+    );
   });
 
   it("returns null", async () => {

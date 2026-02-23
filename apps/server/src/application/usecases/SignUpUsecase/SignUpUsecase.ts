@@ -1,6 +1,11 @@
 import { PrismaClient } from "../../../../generated/prisma_client/client.js";
 import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
 import ValidationException from "../../../exceptions/ValidationException.js";
+import getEmailVerificationTemplate, {
+  GetEmailVerificationTemplate,
+} from "../../../Mailer/emailTemplates/emailVerificationTemplate.js";
+import { mailer } from "../../../Mailer/index.js";
+import Mailer from "../../../Mailer/Mailer.js";
 import { prisma } from "../../../prisma.js";
 import pwnedPasswordCheckerService, {
   PwnedPasswordCheckerService,
@@ -23,6 +28,8 @@ export class SignUpUsecase {
     private readonly _userEmailRotationService: UserEmailRotationService,
     private readonly _pwnedPasswordCheckerService: PwnedPasswordCheckerService,
     private readonly _emailVerificationCodeCreatorService: EmailVerificationCodeCreatorService,
+    private readonly _mailer: Mailer,
+    private readonly _getEmailVerificationTemplate: GetEmailVerificationTemplate,
     private readonly _prisma: PrismaClient,
   ) {}
 
@@ -58,9 +65,11 @@ export class SignUpUsecase {
 
       const { createdUser } = await this._userCreatorService.execute(tsx, data);
 
-      await this._emailVerificationCodeCreatorService.execute(tsx, {
+      const { code } = await this._emailVerificationCodeCreatorService.execute(tsx, {
         user_id: createdUser.id,
       });
+
+      await this._mailer.send(this._getEmailVerificationTemplate(code), data.email);
 
       return null;
     });
@@ -73,6 +82,8 @@ const signUpUsecase = new SignUpUsecase(
   userEmailRotationService,
   pwnedPasswordCheckerService,
   emailVerificationCodeCreatorService,
+  mailer,
+  getEmailVerificationTemplate,
   prisma,
 );
 
