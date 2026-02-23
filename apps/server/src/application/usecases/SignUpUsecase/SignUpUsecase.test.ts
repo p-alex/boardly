@@ -1,5 +1,4 @@
 import { vi, Mocked, Mock } from "vitest";
-
 import { UserCreatorService } from "../../services/user/UserCreatorService";
 import { UserEmailFinderService } from "../../services/user/UserEmailFinderService";
 import { UserEmailRotationService } from "../../services/user/UserEmailRotationService";
@@ -10,6 +9,7 @@ import { mockUser } from "../../../__fixtures__/user/mockUser.js";
 import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
 import { PwnedPasswordCheckerService } from "../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
 import ValidationException from "../../../exceptions/ValidationException.js";
+import { EmailVerificationCodeCreatorService } from "../../services/emailVerificationCode/EmailVerificationCodeCreatorService.js";
 
 describe("SignUpUsecase.ts (unit)", () => {
   let signUpUsecase: SignUpUsecase;
@@ -18,6 +18,7 @@ describe("SignUpUsecase.ts (unit)", () => {
   let userEmailFinderServiceMock: UserEmailFinderService;
   let userEmailRotationServiceMock: UserEmailRotationService;
   let pwnedPasswordCheckerServiceMock: Mocked<PwnedPasswordCheckerService>;
+  let emailVerificationCodeCreatorServiceMock: Mocked<EmailVerificationCodeCreatorService>;
 
   let prismaMock: Mocked<PrismaClient>;
 
@@ -35,7 +36,7 @@ describe("SignUpUsecase.ts (unit)", () => {
     } as unknown as Mocked<PrismaClient>;
 
     userCreatorServiceMock = {
-      execute: vi.fn(),
+      execute: vi.fn().mockResolvedValue({ createdUser: mockUser }),
     } as unknown as Mocked<UserCreatorService>;
 
     userEmailFinderServiceMock = {
@@ -50,11 +51,16 @@ describe("SignUpUsecase.ts (unit)", () => {
       execute: vi.fn(),
     } as unknown as Mocked<PwnedPasswordCheckerService>;
 
+    emailVerificationCodeCreatorServiceMock = {
+      execute: vi.fn().mockResolvedValue({ code: "code" }),
+    } as unknown as Mocked<EmailVerificationCodeCreatorService>;
+
     signUpUsecase = new SignUpUsecase(
       userCreatorServiceMock,
       userEmailFinderServiceMock,
       userEmailRotationServiceMock,
       pwnedPasswordCheckerServiceMock,
+      emailVerificationCodeCreatorServiceMock,
       prismaMock,
     );
   });

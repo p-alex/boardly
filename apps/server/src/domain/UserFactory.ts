@@ -25,6 +25,7 @@ export class UserFactory {
       email_verified: false,
       updated_at: new Date(Date.now()),
       created_at: new Date(Date.now()),
+      hard_lock_until: null,
     };
   };
 }

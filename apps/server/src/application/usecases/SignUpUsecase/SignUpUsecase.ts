@@ -5,6 +5,9 @@ import { prisma } from "../../../prisma.js";
 import pwnedPasswordCheckerService, {
   PwnedPasswordCheckerService,
 } from "../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
+import emailVerificationCodeCreatorService, {
+  EmailVerificationCodeCreatorService,
+} from "../../services/emailVerificationCode/EmailVerificationCodeCreatorService.js";
 import userCreatorService, { UserCreatorService } from "../../services/user/UserCreatorService.js";
 import userEmailFinderService, {
   UserEmailFinderService,
@@ -19,6 +22,7 @@ export class SignUpUsecase {
     private readonly _userEmailFinderService: UserEmailFinderService,
     private readonly _userEmailRotationService: UserEmailRotationService,
     private readonly _pwnedPasswordCheckerService: PwnedPasswordCheckerService,
+    private readonly _emailVerificationCodeCreatorService: EmailVerificationCodeCreatorService,
     private readonly _prisma: PrismaClient,
   ) {}
 
@@ -52,7 +56,11 @@ export class SignUpUsecase {
           "Password has been found in a data breech and it's not safe to use. Please try another one.",
         );
 
-      await this._userCreatorService.execute(tsx, data);
+      const { createdUser } = await this._userCreatorService.execute(tsx, data);
+
+      await this._emailVerificationCodeCreatorService.execute(tsx, {
+        user_id: createdUser.id,
+      });
 
       return null;
     });
@@ -64,6 +72,7 @@ const signUpUsecase = new SignUpUsecase(
   userEmailFinderService,
   userEmailRotationService,
   pwnedPasswordCheckerService,
+  emailVerificationCodeCreatorService,
   prisma,
 );
 

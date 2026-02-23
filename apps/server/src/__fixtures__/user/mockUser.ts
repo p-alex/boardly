@@ -10,4 +10,5 @@ export const mockUser: User = {
   email_hash_secret_version: "V1",
   email_verified: false,
   encrypted_email: "encrypted_email",
+  hard_lock_until: null,
 };
