@@ -7,6 +7,7 @@ import signUpApi from "../../api/signUpApi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { AxiosError } from "axios";
+import { MemoryRouter } from "react-router-dom";
 
 vi.mock("../../api/signUpApi", () => ({ default: vi.fn().mockResolvedValue(null) }));
 
@@ -19,7 +20,11 @@ function createWrapper() {
   });
 
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <MemoryRouter>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </MemoryRouter>
+    );
   };
 }
 

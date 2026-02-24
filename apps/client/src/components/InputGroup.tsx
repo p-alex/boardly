@@ -24,7 +24,7 @@ function InputGroup({ label, error, isRequired, ...inputProps }: Props) {
         type="text"
         id={id}
         {...inputProps}
-        className={`${inputBorderColor} w-full py-2 px-4 border rounded-ui bg-[#fdfdfd]"`}
+        className={`${inputBorderColor} w-full py-2 px-4 border rounded-ui bg-[#fdfdfd] disabled:opacity-75 disabled:cursor-not-allowed`}
       />
       {error && (
         <p className="text-sm text-error font-medium flex items-center gap-1">

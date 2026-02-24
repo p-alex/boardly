@@ -10,6 +10,7 @@ import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { useMutation } from "@tanstack/react-query";
 import signUpApi from "../../api/signUpApi";
 import { ErrorTraingleIcon } from "../../svgs";
+import { useNavigate } from "react-router-dom";
 
 const serverErrorToFieldMap: Record<string, keyof SignUpFormSchema> = {
   "A user with that username already exists.": "username",
@@ -19,6 +20,8 @@ const serverErrorToFieldMap: Record<string, keyof SignUpFormSchema> = {
 };
 
 function SignUpForm() {
+  const navigate = useNavigate();
+
   const form = useForm<SignUpFormSchema>({ resolver: zodResolver(signUpFormSchema), mode: "all" });
 
   const signUpMutation = useMutation({
@@ -38,6 +41,7 @@ function SignUpForm() {
       }
     },
     onSuccess: () => {
+      navigate("/send-email-verification-code", { state: { email: form.getValues("email") } });
       form.reset();
     },
   });
