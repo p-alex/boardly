@@ -9,6 +9,10 @@
     "build": "tsc"
   },
   "exports": {
+    "./dtos/": {
+      "types": "./dist/dtos/index.d.ts",
+      "import": "./dist/dtos/index.js"
+    },
     "./dtos/auth": {
       "types": "./dist/dtos/auth/index.d.ts",
       "import": "./dist/dtos/auth/index.js"
@@ -20,6 +24,10 @@
     "./dtos/user": {
       "types": "./dist/dtos/user/index.d.ts",
       "import": "./dist/dtos/user/index.js"
+    },
+    "./dtos/emailVerificationCode": {
+      "types": "./dist/dtos/emailVerificationCode/index.d.ts",
+      "import": "./dist/dtos/emailVerificationCode/index.js"
     },
     "./utils": {
       "types": "./dist/utils/index.d.ts",
