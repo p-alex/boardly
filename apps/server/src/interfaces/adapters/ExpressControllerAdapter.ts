@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IController } from "../controllers/EmailSignUpController/index.js";
+import { IController } from "../controllers/auth/EmailSignUpController/index.js";
 import handleServerError from "../../handleServerError.js";
 import { getHttpRequest } from "./index.js";
 

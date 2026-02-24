@@ -1,4 +1,4 @@
-import { HttpRequest } from "../../adapters/index.js";
+import { HttpRequest } from "../../../adapters/index.js";
 
 export type ControllerResponse<TResult> = {
   result: TResult;

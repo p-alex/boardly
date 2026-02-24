@@ -1,6 +1,6 @@
 import { Mocked, vi } from "vitest";
 import { ExpressControllerAdapter } from "./ExpressControllerAdapter";
-import { ControllerResponse, IController } from "../controllers/EmailSignUpController";
+import { ControllerResponse, IController } from "../controllers/auth/EmailSignUpController";
 import { mockReq } from "../../__fixtures__/request/mockReq";
 import { mockRes } from "../../__fixtures__/response/mockRes";
 

@@ -1,7 +1,7 @@
 import signUpUsecase, {
   SignUpUsecase,
-} from "../../../application/usecases/SignUpUsecase/SignUpUsecase.js";
-import { HttpRequest } from "../../adapters/index.js";
+} from "../../../../application/usecases/SignUpUsecase/SignUpUsecase.js";
+import { HttpRequest } from "../../../adapters/index.js";
 import { ControllerResponse, IController } from "./index.js";
 import { SignUpRequestDtoSchema, SignUpResponseDtoSchema } from "@boardly/shared/dtos/auth";
 

@@ -3,7 +3,7 @@ import expressControllerAdapter from "../adapters/ExpressControllerAdapter.js";
 import expressMiddlewareAdapter from "../adapters/ExpressMiddlewareAdapter.js";
 import resourceValidator from "../../middleware/ResourceValidator/ResourceValidator.js";
 import { signUpRequestDtoSchema } from "@boardly/shared/dtos/auth";
-import emailSignUpController from "../controllers/EmailSignUpController/EmailSignUpController.js";
+import emailSignUpController from "../controllers/auth/EmailSignUpController/EmailSignUpController.js";
 import rateLimiter from "../../middleware/RateLimiter/RateLimiter.js";
 
 const authRouter = Router();

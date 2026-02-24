@@ -1,8 +1,8 @@
 import { Mocked, vi } from "vitest";
-import { SignUpUsecase } from "../../../application/usecases/SignUpUsecase/SignUpUsecase";
-import { EmailSignUpController } from "../EmailSignUpController/EmailSignUpController";
-import { mockHttpRequest } from "../../../__fixtures__/request/index";
-import { IEnv } from "../../../config";
+import { SignUpUsecase } from "../../../../application/usecases/SignUpUsecase/SignUpUsecase";
+import { EmailSignUpController } from "./EmailSignUpController";
+import { mockHttpRequest } from "../../../../__fixtures__/request/index";
+import { IEnv } from "../../../../config";
 
 vi.mock("../../../config", () => ({
   env: {
