@@ -1,14 +1,12 @@
 import { IUsecase } from "../index.js";
 import { prisma } from "../../../prisma.js";
-import emailVerificationCodeCreatorService, {
-  EmailVerificationCodeCreatorService,
-} from "../../services/emailVerificationCode/EmailVerificationCodeCreatorService.js";
+import createVerificationCodeService, {
+  CreateVerificationCodeService,
+} from "../../services/verificationCode/CreateVerificationCodeService.js";
 import { PrismaClient } from "../../../../generated/prisma_client/client.js";
 import userEmailFinderService, {
   UserEmailFinderService,
 } from "../../services/user/UserEmailFinderService.js";
-import NotFoundException from "../../../exceptions/NotFoundException.js";
-import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
 import Mailer from "../../../Mailer/Mailer.js";
 import getEmailVerificationTemplate, {
   GetEmailVerificationTemplate,
@@ -19,7 +17,7 @@ export class SendEmailVerificationCodeUsecase implements IUsecase {
   constructor(
     private readonly _prisma: PrismaClient,
     private readonly _userEmailFinderService: UserEmailFinderService,
-    private readonly _emailVerificationCodeCreatorService: EmailVerificationCodeCreatorService,
+    private readonly _createVerificationCodeService: CreateVerificationCodeService,
     private readonly _mailer: Mailer,
     private readonly _getEmailVerificationTemplate: GetEmailVerificationTemplate,
   ) {}
@@ -28,13 +26,13 @@ export class SendEmailVerificationCodeUsecase implements IUsecase {
     return await this._prisma.$transaction(async (tsx) => {
       const { user } = await this._userEmailFinderService.execute(tsx, { email: data.email });
 
-      if (!user) throw new NotFoundException("A user with that email does not exist.");
+      if (!user) return true;
 
-      if (user.email_verified === true)
-        throw new AlreadyExistsException("This email is already verified.");
+      if (user.email_verified === true) return true;
 
-      const { code } = await this._emailVerificationCodeCreatorService.execute(tsx, {
+      const { code } = await this._createVerificationCodeService.execute(tsx, {
         user_id: user.id,
+        code_type: "emailVerificationCode",
       });
 
       await this._mailer.send(this._getEmailVerificationTemplate(code), data.email);
@@ -47,7 +45,7 @@ export class SendEmailVerificationCodeUsecase implements IUsecase {
 const sendEmailVerificationCodeUsecase = new SendEmailVerificationCodeUsecase(
   prisma,
   userEmailFinderService,
-  emailVerificationCodeCreatorService,
+  createVerificationCodeService,
   mailer,
   getEmailVerificationTemplate,
 );
