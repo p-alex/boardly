@@ -8,6 +8,7 @@ export class VerificationCodeFactory {
   create = (data: { user_id: string; code: string }): VerificationCode => {
     const now = Date.now();
     const expiresIn = 1000 * 60 * 10; // 10 minutes
+    const defaultCanResendAt = Date.now() + 1000 * 60 * 1; // 1 minute
 
     return {
       id: this._cryptoUtil.randomUUID(),
@@ -16,6 +17,8 @@ export class VerificationCodeFactory {
         data.code,
         env.HASH_SECRETS.VERIFICATION_CODES.EMAIL_VERIFICATION,
       ),
+      can_resend_at: new Date(defaultCanResendAt),
+      resend_code_count: 0,
       last_attempt_at: null,
       attempts: 0,
       expires_at: new Date(now + expiresIn),

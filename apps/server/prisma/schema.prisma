@@ -54,14 +54,17 @@ model UserPasswordAuth {
 }
 
 model EmailVerificationCode {
-  id              String    @id
-  user_id         String    @unique
-  code_hash       String
-  expires_at      DateTime
-  attempts        Int       @default(0)
-  last_attempt_at DateTime?
-  lock_until      DateTime?
-  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id                String    @id
+  user_id           String    @unique
+  code_hash         String
+  expires_at        DateTime
+  resend_code_count Int       @default(0)
+  can_resend_at     DateTime
+  attempts          Int       @default(0)
+  last_attempt_at   DateTime?
+  lock_until        DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("email_verification_codes")
 }

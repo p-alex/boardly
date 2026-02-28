@@ -5,6 +5,7 @@ import { VerificationCode } from "../services/verificationCode";
 import { IEnv } from "../../config";
 
 const EMAIL_CODE_EXPIRY_MS = 1000 * 60 * 10;
+const EMAIL_CODE_RESEND_DEFAULT_MS = 1000 * 60 * 1;
 
 vi.mock("../../config.js", () => ({
   env: {
@@ -61,6 +62,8 @@ describe("VerificationCodeFactory.ts", () => {
       id: "uuid",
       user_id: "user_id",
       code_hash: "hash",
+      resend_code_count: 0,
+      can_resend_at: new Date(1000 + EMAIL_CODE_RESEND_DEFAULT_MS),
       attempts: 0,
       last_attempt_at: null,
       expires_at: new Date(1000 + EMAIL_CODE_EXPIRY_MS),
