@@ -1,11 +1,11 @@
 import { Mocked, vi } from "vitest";
 import { CryptoUtil } from "@boardly/shared/utils";
-import { UserFactory } from "../domain/UserFactory";
-import { mockUser } from "../__fixtures__/user/mockUser";
-import { User } from "../../generated/prisma_client/client";
-import { IEnv } from "../config";
+import { mockUser } from "../../__fixtures__/user/mockUser";
+import { User } from "../../../generated/prisma_client/client";
+import { IEnv } from "../../config";
+import { UserFactory } from "../factories/UserFactory";
 
-vi.mock("../config", () => ({
+vi.mock("../../config.js", () => ({
   env: {
     ENCRYPTION_SECRETS: {
       EMAIL: {

@@ -1,6 +1,6 @@
 import { cryptoUtil, CryptoUtil } from "@boardly/shared/utils";
-import { UserPasswordAuth } from "../../generated/prisma_client/client.js";
-import { env } from "../config.js";
+import { UserPasswordAuth } from "../../../generated/prisma_client/client.js";
+import { env } from "../../config.js";
 
 export class UserPasswordAuthFactory {
   constructor(private readonly _cryptoUtil: CryptoUtil) {}

@@ -1,14 +1,23 @@
 import { Mocked, vi } from "vitest";
 import { CryptoUtil } from "@boardly/shared/utils";
-import { EmailVerificationCodeFactory } from "./EmailVerificationCodeFactory";
-import { EmailVerificationCode } from "../../generated/prisma_client/client";
+import { VerificationCodeFactory } from "../factories/VerificationCodeFactory";
+import { VerificationCode } from "../services/verificationCode";
+import { IEnv } from "../../config";
 
 const EMAIL_CODE_EXPIRY_MS = 1000 * 60 * 10;
 
-vi.mock("../config", () => ({ env: { HASH_SECRETS: { EMAIL_VERIFICATION_CODE: "hash secret" } } }));
+vi.mock("../../config.js", () => ({
+  env: {
+    HASH_SECRETS: {
+      VERIFICATION_CODES: {
+        EMAIL_VERIFICATION: "hash secret",
+      },
+    },
+  } as IEnv,
+}));
 
-describe("EmailVerificationCodeFactory.ts", () => {
-  let emailVerificationCodeFactory: EmailVerificationCodeFactory;
+describe("VerificationCodeFactory.ts", () => {
+  let verificationCodeFactory: VerificationCodeFactory;
 
   let cryptoMock: Mocked<CryptoUtil>;
 
@@ -20,7 +29,7 @@ describe("EmailVerificationCodeFactory.ts", () => {
       hmacSHA256: vi.fn().mockReturnValue("hash"),
     } as unknown as Mocked<CryptoUtil>;
 
-    emailVerificationCodeFactory = new EmailVerificationCodeFactory(cryptoMock);
+    verificationCodeFactory = new VerificationCodeFactory(cryptoMock);
   });
 
   afterEach(() => {
@@ -28,13 +37,13 @@ describe("EmailVerificationCodeFactory.ts", () => {
   });
 
   it("hashes the code", () => {
-    emailVerificationCodeFactory.create({ user_id: "user_id", code: "123456" });
+    verificationCodeFactory.create({ user_id: "user_id", code: "123456" });
 
     expect(cryptoMock.hmacSHA256).toHaveBeenCalledWith("123456", "hash secret");
   });
 
   it("sets the expires_at to 10 minutes", () => {
-    const { expires_at } = emailVerificationCodeFactory.create({
+    const { expires_at } = verificationCodeFactory.create({
       user_id: "user_id",
       code: "123456",
     });
@@ -43,7 +52,7 @@ describe("EmailVerificationCodeFactory.ts", () => {
   });
 
   it("returns correctly", () => {
-    const result = emailVerificationCodeFactory.create({
+    const result = verificationCodeFactory.create({
       user_id: "user_id",
       code: "123456",
     });
@@ -56,6 +65,6 @@ describe("EmailVerificationCodeFactory.ts", () => {
       last_attempt_at: null,
       expires_at: new Date(1000 + EMAIL_CODE_EXPIRY_MS),
       lock_until: null,
-    } as EmailVerificationCode);
+    } as VerificationCode);
   });
 });

@@ -4,8 +4,6 @@ import { mockHttpRequest } from "../../__fixtures__/request/mockHttpReq";
 import { MiddlewareResponse } from "..";
 import TooManyRequestsException from "../../exceptions/TooManyRequestsException";
 
-// TODO: complete this test file
-
 describe("RateLimiter.ts (unit)", () => {
   let rateLimiter: RateLimiter;
 

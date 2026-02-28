@@ -1,10 +1,10 @@
 import { CryptoUtil } from "@boardly/shared/utils";
 import { Mocked, vi } from "vitest";
-import { UserPasswordAuthFactory } from "../domain/UserPasswordAuthFactory";
-import { UserPasswordAuth } from "../../generated/prisma_client/client";
-import { IEnv } from "../config";
+import { UserPasswordAuth } from "../../../generated/prisma_client/client";
+import { IEnv } from "../../config";
+import { UserPasswordAuthFactory } from "../factories/UserPasswordAuthFactory";
 
-vi.mock("../config", () => ({
+vi.mock("../../config.js", () => ({
   env: {
     PEPPERS: {
       PASSWORD: {

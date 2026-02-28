@@ -1,10 +1,10 @@
 import { Mock, Mocked, vi } from "vitest";
-import { UserFactory } from "../../../domain/UserFactory";
-import { UserPasswordAuthFactory } from "../../../domain/UserPasswordAuthFactory";
 import { mockUser } from "../../../__fixtures__/user/mockUser";
 import { mockUserPasswordAuthMock } from "../../../__fixtures__/userPasswordAuth/mockUserPasswordAuthMock";
 import { UserPasswordAuth } from "../../../../generated/prisma_client/client";
 import { PrismaTsx } from "..";
+import { UserFactory } from "../../../domain/factories/UserFactory";
+import { UserPasswordAuthFactory } from "../../../domain/factories/UserPasswordAuthFactory";
 
 describe("UserCreatorService.ts (unit)", () => {
   let userCreatorService: any;

@@ -17,7 +17,9 @@ export interface IEnv {
       VERSIONS: EmailHashSecretVersion[];
       ACTIVE_VERSION: EmailHashSecretVersion;
     };
-    EMAIL_VERIFICATION_CODE: string;
+    VERIFICATION_CODES: {
+      EMAIL_VERIFICATION: string;
+    };
   };
   PEPPERS: {
     PASSWORD: Record<PasswordPepperVersion, string> & {
@@ -52,7 +54,9 @@ export const env: IEnv = {
       VERSIONS: ["V1", "V2"],
       ACTIVE_VERSION: process.env.ACTIVE_EMAIL_HASH_SECRET_VERSION! as EmailHashSecretVersion,
     },
-    EMAIL_VERIFICATION_CODE: process.env.EMAIL_VERIFICATION_CODE_HASH_SECRET!,
+    VERIFICATION_CODES: {
+      EMAIL_VERIFICATION: process.env.EMAIL_VERIFICATION_CODE_HASH_SECRET!,
+    },
   },
   PEPPERS: {
     PASSWORD: {

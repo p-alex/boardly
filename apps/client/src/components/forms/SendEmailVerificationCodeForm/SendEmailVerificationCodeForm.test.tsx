@@ -154,7 +154,9 @@ describe("SendEmailVerificationCodeForm.tsx", () => {
 
     await submitForm();
 
-    expect(navigateMock).toHaveBeenCalledWith("/verify-email", { replace: true });
+    expect(navigateMock).toHaveBeenCalledWith("/verify-email", {
+      state: { email: "email@email.com" },
+    });
   });
 
   it("should handle errors other then axios errors correctly", async () => {

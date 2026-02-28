@@ -1,18 +1,10 @@
 import { PrismaClient } from "../../../../generated/prisma_client/client.js";
 import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
 import ValidationException from "../../../exceptions/ValidationException.js";
-import getEmailVerificationTemplate, {
-  GetEmailVerificationTemplate,
-} from "../../../Mailer/emailTemplates/emailVerificationTemplate.js";
-import { mailer } from "../../../Mailer/index.js";
-import Mailer from "../../../Mailer/Mailer.js";
 import { prisma } from "../../../prisma.js";
 import pwnedPasswordCheckerService, {
   PwnedPasswordCheckerService,
 } from "../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
-import emailVerificationCodeCreatorService, {
-  EmailVerificationCodeCreatorService,
-} from "../../services/emailVerificationCode/EmailVerificationCodeCreatorService.js";
 import userCreatorService, { UserCreatorService } from "../../services/user/UserCreatorService.js";
 import userEmailFinderService, {
   UserEmailFinderService,
@@ -60,7 +52,7 @@ export class SignUpUsecase {
           "Password has been found in a data breech and it's not safe to use. Please try another one.",
         );
 
-      const { createdUser } = await this._userCreatorService.execute(tsx, data);
+      await this._userCreatorService.execute(tsx, data);
 
       return null;
     });

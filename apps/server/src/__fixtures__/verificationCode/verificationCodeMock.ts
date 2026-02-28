@@ -1,6 +1,6 @@
 import { EmailVerificationCode } from "../../../generated/prisma_client/client.js";
 
-export const emailVerificationCodeMock: EmailVerificationCode = {
+export const verificationCodeMock: EmailVerificationCode = {
   id: "id",
   user_id: "user_id",
   code_hash: "code_hash",

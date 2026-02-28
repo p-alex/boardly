@@ -1,7 +1,7 @@
 import { Mocked, vi } from "vitest";
 
 import { ResourceValidator } from "../../middleware/ResourceValidator/ResourceValidator";
-import { success, ZodMiniObject } from "zod/v4-mini";
+import { ZodMiniObject } from "zod/v4-mini";
 import { mockHttpRequest } from "../../__fixtures__/request/mockHttpReq";
 import ValidationException from "../../exceptions/ValidationException";
 

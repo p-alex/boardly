@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { EmailVerificationCodeCreatorService } from "./EmailVerificationCodeCreatorService";
 import type { CryptoUtil } from "@boardly/shared/utils";
-import type { EmailVerificationCodeFactory } from "../../../domain/EmailVerificationCodeFactory";
-import { prisma } from "../../../prisma";
-import { emailVerificationFixtures } from "../../../__fixtures__/index.js";
+import { prisma } from "../../../prisma.js";
+import { verificationCodeFixtures } from "../../../__fixtures__/index.js";
+import { VerificationCodeFactory } from "../../../domain/factories/VerificationCodeFactory.js";
+import { CreateVerificationCodeService } from "./CreateVerificationCodeService.js";
 
 vi.mock("../../../prisma", () => ({
   prisma: {
@@ -13,10 +13,10 @@ vi.mock("../../../prisma", () => ({
   },
 }));
 
-describe("EmailVerificationCodeCreatorService", () => {
+describe("CreateVerificationCodeService.ts (unit)", () => {
   let cryptoUtil: CryptoUtil;
-  let factory: EmailVerificationCodeFactory;
-  let service: EmailVerificationCodeCreatorService;
+  let factory: VerificationCodeFactory;
+  let service: CreateVerificationCodeService;
 
   beforeEach(() => {
     cryptoUtil = {
@@ -25,9 +25,9 @@ describe("EmailVerificationCodeCreatorService", () => {
 
     factory = {
       create: vi.fn(),
-    } as unknown as EmailVerificationCodeFactory;
+    } as unknown as VerificationCodeFactory;
 
-    service = new EmailVerificationCodeCreatorService(cryptoUtil, factory);
+    service = new CreateVerificationCodeService(cryptoUtil, factory);
   });
 
   afterEach(() => {
@@ -39,12 +39,12 @@ describe("EmailVerificationCodeCreatorService", () => {
     const generatedCode = "ABCDEFGH";
 
     vi.mocked(cryptoUtil.generateCode).mockReturnValue(generatedCode);
-    vi.mocked(factory.create).mockReturnValue(emailVerificationFixtures.emailVerificationCodeMock);
+    vi.mocked(factory.create).mockReturnValue(verificationCodeFixtures.verificationCodeMock);
     vi.mocked(prisma.emailVerificationCode.create).mockResolvedValue(
-      emailVerificationFixtures.emailVerificationCodeMock as any,
+      verificationCodeFixtures.verificationCodeMock as any,
     );
 
-    const result = await service.execute(null, { user_id });
+    const result = await service.execute(null, { user_id, code_type: "emailVerificationCode" });
 
     expect(cryptoUtil.generateCode).toHaveBeenCalledWith(6);
 
@@ -54,12 +54,12 @@ describe("EmailVerificationCodeCreatorService", () => {
     });
 
     expect(prisma.emailVerificationCode.create).toHaveBeenCalledWith({
-      data: emailVerificationFixtures.emailVerificationCodeMock,
+      data: verificationCodeFixtures.verificationCodeMock,
     });
 
     expect(result).toEqual({
       code: generatedCode,
-      emailVerificationCode: emailVerificationFixtures.emailVerificationCodeMock,
+      verificationCode: verificationCodeFixtures.verificationCodeMock,
     });
   });
 
@@ -76,7 +76,7 @@ describe("EmailVerificationCodeCreatorService", () => {
     vi.mocked(cryptoUtil.generateCode).mockReturnValue(generatedCode);
     vi.mocked(factory.create).mockReturnValue({ test: true } as any);
 
-    await service.execute(tx as any, { user_id });
+    await service.execute(tx as any, { user_id, code_type: "emailVerificationCode" });
 
     expect(tx.emailVerificationCode.create).toHaveBeenCalled();
     expect(prisma.emailVerificationCode.create).not.toHaveBeenCalled();

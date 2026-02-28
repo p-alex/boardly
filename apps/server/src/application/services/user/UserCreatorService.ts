@@ -1,7 +1,7 @@
-import userFactory, { UserFactory } from "../../../domain/UserFactory.js";
+import userFactory, { UserFactory } from "../../../domain/factories/UserFactory.js";
 import userPasswordAuthFactory, {
   UserPasswordAuthFactory,
-} from "../../../domain/UserPasswordAuthFactory.js";
+} from "../../../domain/factories/UserPasswordAuthFactory.js";
 import { prisma } from "../../../prisma.js";
 import { IService, PrismaTsx } from "../index.js";
 
