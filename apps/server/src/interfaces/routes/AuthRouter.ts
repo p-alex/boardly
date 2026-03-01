@@ -20,7 +20,7 @@ authRouter.post(
 
 authRouter.post(
   "/send-verification-code",
-  expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 10 })),
+  expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 30 })),
   expressMiddlewareAdapter.adapt(
     resourceValidator.setup({ schema: sendVerificationCodeRequestDto }),
   ),
