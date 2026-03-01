@@ -11,7 +11,7 @@ import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 
 vi.mock("../../../api/sendEmailVerificationCodeApi", () => ({ default: vi.fn() }));
 
-import SendEmailVerificationCodeForm from "./SendEmailVerificationCodeForm";
+import SendEmailVerificationCodeForm from "./SendVerificationCodeForm";
 
 const navigateMock = vi.fn();
 
@@ -51,13 +51,15 @@ function makeWrapper() {
   );
 }
 
-describe("SendEmailVerificationCodeForm.tsx", () => {
+describe("SendVerificationCodeForm.tsx", () => {
   afterEach(() => {
     vi.resetAllMocks();
   });
 
   it("prevents user from submitting if form is invalid", async () => {
-    render(<SendEmailVerificationCodeForm />, { wrapper: makeWrapper() });
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+      wrapper: makeWrapper(),
+    });
 
     await fillInvalid();
 
@@ -67,7 +69,10 @@ describe("SendEmailVerificationCodeForm.tsx", () => {
   });
 
   it("automatically fills email field with the email prop value if passsed", () => {
-    render(<SendEmailVerificationCodeForm email="email@email.com" />, { wrapper: makeWrapper() });
+    render(
+      <SendEmailVerificationCodeForm email="email@email.com" code_type="EMAIL_VERIFICATION" />,
+      { wrapper: makeWrapper() },
+    );
 
     const emailField = screen.getByRole("textbox");
 
@@ -86,13 +91,18 @@ describe("SendEmailVerificationCodeForm.tsx", () => {
 
     (sendEmailVerificationCodeApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SendEmailVerificationCodeForm />, { wrapper: makeWrapper() });
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+      wrapper: makeWrapper(),
+    });
 
     const { emailField } = await fillValid();
 
     await submitForm();
 
-    expect(sendEmailVerificationCodeApi).toHaveBeenCalledWith({ email: "email@email.com" });
+    expect(sendEmailVerificationCodeApi).toHaveBeenCalledWith({
+      email: "email@email.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
 
     expect(emailField).toBeInvalid();
 
@@ -113,7 +123,9 @@ describe("SendEmailVerificationCodeForm.tsx", () => {
 
     (sendEmailVerificationCodeApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SendEmailVerificationCodeForm />, { wrapper: makeWrapper() });
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+      wrapper: makeWrapper(),
+    });
 
     await fillValid();
 
@@ -136,7 +148,9 @@ describe("SendEmailVerificationCodeForm.tsx", () => {
 
     (sendEmailVerificationCodeApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SendEmailVerificationCodeForm />, { wrapper: makeWrapper() });
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+      wrapper: makeWrapper(),
+    });
 
     await fillValid();
 
@@ -148,7 +162,9 @@ describe("SendEmailVerificationCodeForm.tsx", () => {
   });
 
   it("redirects user to /verify-email if the submission was successfull", async () => {
-    render(<SendEmailVerificationCodeForm />, { wrapper: makeWrapper() });
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+      wrapper: makeWrapper(),
+    });
 
     await fillValid();
 
@@ -162,10 +178,26 @@ describe("SendEmailVerificationCodeForm.tsx", () => {
   it("should handle errors other then axios errors correctly", async () => {
     (sendEmailVerificationCodeApi as Mock).mockRejectedValue(new Error("random error"));
 
-    render(<SendEmailVerificationCodeForm />, { wrapper: makeWrapper() });
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+      wrapper: makeWrapper(),
+    });
 
     await fillValid();
 
     await submitForm();
+  });
+
+  it("displays description if provided", () => {
+    render(
+      <SendEmailVerificationCodeForm
+        code_type="EMAIL_VERIFICATION"
+        description="description provided"
+      />,
+      {
+        wrapper: makeWrapper(),
+      },
+    );
+
+    expect(screen.getByText("description provided")).toBeInTheDocument();
   });
 });

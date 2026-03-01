@@ -3,7 +3,7 @@ import { Mock, vi } from "vitest";
 import SignUpForm from "./SignUpForm";
 import userEvent from "@testing-library/user-event";
 
-import signUpApi from "../../api/signUpApi";
+import signUpApi from "../../../api/signUpApi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { AxiosError } from "axios";

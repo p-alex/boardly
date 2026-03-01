@@ -1,15 +1,15 @@
 import { useForm } from "react-hook-form";
-import InputGroup from "../InputGroup";
-import LargeLogo from "../LargeLogo";
+import InputGroup from "../../InputGroup";
+import LargeLogo from "../../LargeLogo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import signUpFormSchema, { SignUpFormSchema } from "./signUpForm.schema";
-import Button from "../Button/Button";
-import ReCaptchaFormMessage from "../ReCaptchaFormMessage";
+import Button from "../../Button/Button";
+import ReCaptchaFormMessage from "../../ReCaptchaFormMessage";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { useMutation } from "@tanstack/react-query";
-import signUpApi from "../../api/signUpApi";
-import { ErrorTraingleIcon } from "../../svgs";
+import signUpApi from "../../../api/signUpApi";
+import { ErrorTraingleIcon } from "../../../svgs";
 import { useNavigate } from "react-router-dom";
 
 const serverErrorToFieldMap: Record<string, keyof SignUpFormSchema> = {

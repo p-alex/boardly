@@ -12,17 +12,25 @@ import getEmailVerificationTemplate, {
   GetEmailVerificationTemplate,
 } from "../../../Mailer/emailTemplates/emailVerificationTemplate.js";
 import { mailer } from "../../../Mailer/index.js";
+import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
+import verificationCodeMapper, {
+  VerificationCodeMapper,
+} from "../../../domain/mappers/VerificationCodeMapper.js";
 
-export class SendEmailVerificationCodeUsecase implements IUsecase {
+export class SendVerificationCodeUsecase implements IUsecase {
   constructor(
     private readonly _prisma: PrismaClient,
     private readonly _userEmailFinderService: UserEmailFinderService,
     private readonly _createVerificationCodeService: CreateVerificationCodeService,
     private readonly _mailer: Mailer,
     private readonly _getEmailVerificationTemplate: GetEmailVerificationTemplate,
+    private readonly _verificationCodeMapper: VerificationCodeMapper,
   ) {}
 
-  execute = async (data: { email: string }) => {
+  execute = async (data: {
+    email: string;
+    code_type: verificationCodeFieldValidations.VerificationCodeType;
+  }) => {
     return await this._prisma.$transaction(async (tsx) => {
       const { user } = await this._userEmailFinderService.execute(tsx, { email: data.email });
 
@@ -32,7 +40,7 @@ export class SendEmailVerificationCodeUsecase implements IUsecase {
 
       const { code } = await this._createVerificationCodeService.execute(tsx, {
         user_id: user.id,
-        code_type: "emailVerificationCode",
+        code_type: this._verificationCodeMapper.map(data.code_type),
       });
 
       await this._mailer.send(this._getEmailVerificationTemplate(code), data.email);
@@ -42,12 +50,13 @@ export class SendEmailVerificationCodeUsecase implements IUsecase {
   };
 }
 
-const sendEmailVerificationCodeUsecase = new SendEmailVerificationCodeUsecase(
+const sendVerificationCodeUsecase = new SendVerificationCodeUsecase(
   prisma,
   userEmailFinderService,
   createVerificationCodeService,
   mailer,
   getEmailVerificationTemplate,
+  verificationCodeMapper,
 );
 
-export default sendEmailVerificationCodeUsecase;
+export default sendVerificationCodeUsecase;

@@ -5,8 +5,8 @@ import resourceValidator from "../../middleware/ResourceValidator/ResourceValida
 import { signUpRequestDtoSchema, verifyEmailRequestDtoSchema } from "@boardly/shared/dtos/auth";
 import emailSignUpController from "../controllers/auth/EmailSignUpController/EmailSignUpController.js";
 import rateLimiter from "../../middleware/RateLimiter/RateLimiter.js";
-import { sendEmailVerificationCodeRequestDto } from "@boardly/shared/dtos/emailVerificationCode";
-import sendEmailVerificationCodeController from "../controllers/emailVerificationCode/SendEmailVerificationCodeController/SendEmailVerificationCodeController.js";
+import { sendVerificationCodeRequestDto } from "@boardly/shared/dtos/verificationCode";
+import sendverificationCodeController from "../controllers/verificationCode/SendVerificationCodeController/SendVerificationCodeController.js";
 import verifiyEmailController from "../controllers/auth/VerifyEmailController/VerifiyEmailController.js";
 
 const authRouter = Router();
@@ -19,12 +19,12 @@ authRouter.post(
 );
 
 authRouter.post(
-  "/send-email-verification-code",
+  "/send-verification-code",
   expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 10 })),
   expressMiddlewareAdapter.adapt(
-    resourceValidator.setup({ schema: sendEmailVerificationCodeRequestDto }),
+    resourceValidator.setup({ schema: sendVerificationCodeRequestDto }),
   ),
-  expressControllerAdapter.adapt(sendEmailVerificationCodeController),
+  expressControllerAdapter.adapt(sendverificationCodeController),
 );
 
 authRouter.post(

@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import CenterLayout from "../layouts/CenterLayout";
 import FloatingContainer from "../components/FloatingContainer";
-import SendEmailVerificationCodeForm from "../components/forms/SendEmailVerificationCodeForm/SendEmailVerificationCodeForm";
+import SendVerificationCodeForm from "../components/forms/SendVerificationCodeForm/SendVerificationCodeForm";
 
 function SendEmailVerificationCodePage() {
   const location = useLocation();
@@ -9,7 +9,11 @@ function SendEmailVerificationCodePage() {
   return (
     <CenterLayout>
       <FloatingContainer>
-        <SendEmailVerificationCodeForm email={location.state?.email} />
+        <SendVerificationCodeForm
+          email={location.state?.email}
+          code_type="EMAIL_VERIFICATION"
+          description="You need to verify your email to be able to sign in"
+        />
       </FloatingContainer>
     </CenterLayout>
   );

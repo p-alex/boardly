@@ -1,4 +1,4 @@
 import * as userFieldValidations from "./user.js";
-import * as emailVerificationCodeFieldValidations from "./emailVerificationCode.js";
+import * as verificationCodeFieldValidations from "./verificationCode.js";
 
-export { userFieldValidations, emailVerificationCodeFieldValidations };
+export { userFieldValidations, verificationCodeFieldValidations };

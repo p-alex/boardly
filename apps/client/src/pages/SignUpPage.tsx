@@ -1,7 +1,7 @@
 import FloatingContainer from "../components/FloatingContainer";
 import CenterLayout from "../layouts/CenterLayout";
 import { useHead } from "@unhead/react";
-import SignUpForm from "../components/forms/SignUpForm";
+import SignUpForm from "../components/forms/SignUpForm/SignUpForm";
 
 function SignUpPage() {
   useHead({

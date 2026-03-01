@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { SendEmailVerificationCodeUsecase } from "./SendEmailVerificationCodeUsecase.js";
+import { SendVerificationCodeUsecase } from "./SendVerificationCodeUsecase.js";
 import NotFoundException from "../../../exceptions/NotFoundException.js";
 import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
 import { mockUser } from "../../../__fixtures__/user/mockUser.js";
+import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
+import verificationCodeMapper from "../../../domain/mappers/VerificationCodeMapper.js";
+
+// TODO: UNIFY VERIFICATION CODES
 
 // Mock dependencies
 const prismaMock = {
@@ -23,16 +27,17 @@ const mailerMock = {
 
 const getEmailVerificationTemplateMock = vi.fn();
 
-let usecase: SendEmailVerificationCodeUsecase;
+let usecase: SendVerificationCodeUsecase;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  usecase = new SendEmailVerificationCodeUsecase(
+  usecase = new SendVerificationCodeUsecase(
     prismaMock as any,
     userEmailFinderServiceMock as any,
     emailVerificationCodeCreatorServiceMock as any,
     mailerMock as any,
     getEmailVerificationTemplateMock as any,
+    verificationCodeMapper,
   );
 });
 
@@ -41,7 +46,10 @@ describe("SendEmailVerificationCodeUsecase", () => {
     userEmailFinderServiceMock.execute.mockResolvedValue({ user: null });
     prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
 
-    const result = await usecase.execute({ email: "test@example.com" });
+    const result = await usecase.execute({
+      email: "test@example.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
 
     expect(result).toBe(true);
 
@@ -56,7 +64,10 @@ describe("SendEmailVerificationCodeUsecase", () => {
     });
     prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
 
-    const result = await usecase.execute({ email: "test@example.com" });
+    const result = await usecase.execute({
+      email: "test@example.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
 
     expect(result).toBe(true);
   });
@@ -74,7 +85,10 @@ describe("SendEmailVerificationCodeUsecase", () => {
 
     prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
 
-    const result = await usecase.execute({ email: "test@example.com" });
+    const result = await usecase.execute({
+      email: "test@example.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
 
     expect(result).toBe(true);
     expect(emailVerificationCodeCreatorServiceMock.execute).toHaveBeenCalledWith(prismaMock, {

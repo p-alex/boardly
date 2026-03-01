@@ -25,9 +25,9 @@
       "types": "./dist/dtos/user/index.d.ts",
       "import": "./dist/dtos/user/index.js"
     },
-    "./dtos/emailVerificationCode": {
-      "types": "./dist/dtos/emailVerificationCode/index.d.ts",
-      "import": "./dist/dtos/emailVerificationCode/index.js"
+    "./dtos/verificationCode": {
+      "types": "./dist/dtos/verificationCode/index.d.ts",
+      "import": "./dist/dtos/verificationCode/index.js"
     },
     "./utils": {
       "types": "./dist/utils/index.d.ts",

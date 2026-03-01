@@ -1,15 +1,19 @@
 import {
-  SendEmailVerificationCodeRequestDto,
-  SendEmailVerificationCodeResponseDto,
-} from "@boardly/shared/dtos/emailVerificationCode";
+  SendVerificationCodeRequestDto,
+  SendVerificationCodeResponseDto,
+} from "@boardly/shared/dtos/verificationCode";
 import axios, { AxiosResponse } from "axios";
+import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
 
-async function sendEmailVerificationCodeApi(data: { email: string }) {
+async function sendEmailVerificationCodeApi(data: {
+  email: string;
+  code_type: verificationCodeFieldValidations.VerificationCodeType;
+}) {
   const response = await axios.post<
     any,
-    AxiosResponse<SendEmailVerificationCodeResponseDto>,
-    SendEmailVerificationCodeRequestDto["body"]
-  >(import.meta.env.VITE_SERVER_BASE_URL + "/auth/send-email-verification-code", data);
+    AxiosResponse<SendVerificationCodeResponseDto>,
+    SendVerificationCodeRequestDto["body"]
+  >(import.meta.env.VITE_SERVER_BASE_URL + "/auth/send-verification-code", data);
 
   return response.data;
 }
