@@ -14,12 +14,12 @@ export class SendVerificationCodeController implements IController {
   ): Promise<ControllerResponse<SendVerificationCodeResponseDto>> => {
     const { code_type, email } = httpRequest.body;
 
-    await this._sendVerificationCodeUsecase.execute({
+    const { can_resend_at_timestamp } = await this._sendVerificationCodeUsecase.execute({
       email,
       code_type,
     });
 
-    return { code: 200, result: null };
+    return { code: 200, result: { can_resend_at_timestamp } };
   };
 }
 

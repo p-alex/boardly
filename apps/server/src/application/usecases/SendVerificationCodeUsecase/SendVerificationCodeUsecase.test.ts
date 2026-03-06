@@ -83,7 +83,10 @@ describe("SendVerificationCodeUsecase.ts (unit)", () => {
 
     expect(sendVerificationCodeEmailService.execute).not.toHaveBeenCalled();
 
-    expect(result).toBe(false);
+    expect(result).toEqual({
+      success: false,
+      can_resend_at_timestamp: undefined,
+    });
   });
 
   it("should not send verification code if it cannot be sent based on code type", async () => {
@@ -106,7 +109,10 @@ describe("SendVerificationCodeUsecase.ts (unit)", () => {
 
     expect(sendVerificationCodeEmailService.execute).not.toHaveBeenCalled();
 
-    expect(result).toBe(false);
+    expect(result).toEqual({
+      success: false,
+      can_resend_at_timestamp: undefined,
+    });
   });
 
   it("should refresh the verification code if there is one active already, and send it", async () => {
@@ -148,7 +154,11 @@ describe("SendVerificationCodeUsecase.ts (unit)", () => {
       toEmail: "email@email.com",
     });
 
-    expect(result).toBe(true);
+    expect(result).toEqual({
+      success: true,
+      can_resend_at_timestamp:
+        verificationCodeFixtures.verificationCodeMock.can_resend_at.getTime(),
+    });
   });
 
   it("should create a new verification code with a mapped code type if there is no active one, and send it", async () => {
@@ -186,7 +196,11 @@ describe("SendVerificationCodeUsecase.ts (unit)", () => {
       toEmail: "email@email.com",
     });
 
-    expect(result).toBe(true);
+    expect(result).toEqual({
+      success: true,
+      can_resend_at_timestamp:
+        verificationCodeFixtures.verificationCodeMock.can_resend_at.getTime(),
+    });
   });
 
   it("should not send verification code if verification code refresh fails", async () => {

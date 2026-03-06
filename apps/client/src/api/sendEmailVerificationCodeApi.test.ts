@@ -16,7 +16,7 @@ describe("sendEmailVerificationCodeApi", () => {
   });
 
   it("calls axios.post with the correct URL and data", async () => {
-    const fakeResponse: SendVerificationCodeResponseDto = null;
+    const fakeResponse: SendVerificationCodeResponseDto = { can_resend_at_timestamp: 1234 };
     mockedAxios.post.mockResolvedValue({ data: fakeResponse });
 
     const data = {
@@ -33,7 +33,7 @@ describe("sendEmailVerificationCodeApi", () => {
   });
 
   it("returns the response data", async () => {
-    const fakeResponse: SendVerificationCodeResponseDto = null;
+    const fakeResponse: SendVerificationCodeResponseDto = { can_resend_at_timestamp: 1234 };
     mockedAxios.post.mockResolvedValue({ data: fakeResponse });
 
     const result = await sendEmailVerificationCodeApi({

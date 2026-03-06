@@ -34,46 +34,63 @@ export class SendVerificationCodeUsecase implements IUsecase {
     email: string;
     code_type: verificationCodeFieldValidations.VerificationCodeType;
   }) => {
-    const { success, rawCode, code_type } = await this._prisma.$transaction(
-      async (
-        tsx,
-      ): Promise<{ success: boolean; rawCode?: string; code_type?: VerificationCode["type"] }> => {
-        const { user } = await this._userEmailFinderService.execute(tsx, { email: data.email });
+    const { success, rawCode, code_type, can_resend_at_timestamp } =
+      await this._prisma.$transaction(
+        async (
+          tsx,
+        ): Promise<{
+          success: boolean;
+          rawCode?: string;
+          code_type?: VerificationCode["type"];
+          can_resend_at_timestamp?: number;
+        }> => {
+          const { user } = await this._userEmailFinderService.execute(tsx, { email: data.email });
 
-        if (!user) return { success: false };
+          if (!user) return { success: false };
 
-        const codeType = this._verificationCodeTypeMapper.map(data.code_type);
+          const codeType = this._verificationCodeTypeMapper.map(data.code_type);
 
-        const shouldSendBasedOnCodeType = this._shouldSendVerificationCodeBasedOnType({
-          code_type: codeType,
-          user,
-        });
-        if (!shouldSendBasedOnCodeType) return { success: false };
+          const shouldSendBasedOnCodeType = this._shouldSendVerificationCodeBasedOnType({
+            code_type: codeType,
+            user,
+          });
+          if (!shouldSendBasedOnCodeType) return { success: false };
 
-        const activeCode = await tsx.verificationCode.findFirst({
-          where: { user_id: user.id, type: codeType },
-        });
-
-        if (activeCode) {
-          const refreshResult = await this._refreshVerificationCodeService.execute(tsx, {
-            user_id: user.id,
-            verificationCode: activeCode,
+          const activeCode = await tsx.verificationCode.findFirst({
+            where: { user_id: user.id, type: codeType },
           });
 
-          return { success: true, rawCode: refreshResult.rawCode, code_type: activeCode.type };
-        }
+          if (activeCode) {
+            const refreshResult = await this._refreshVerificationCodeService.execute(tsx, {
+              user_id: user.id,
+              verificationCode: activeCode,
+            });
 
-        const { rawCode, verificationCode } = await this._createVerificationCodeService.execute(
-          tsx,
-          {
-            user_id: user.id,
-            code_type: codeType,
-          },
-        );
+            return {
+              success: true,
+              rawCode: refreshResult.rawCode,
+              code_type: activeCode.type,
+              can_resend_at_timestamp:
+                refreshResult.refreshedVerificationCode.can_resend_at.getTime(),
+            };
+          }
 
-        return { success: true, rawCode, code_type: verificationCode.type };
-      },
-    );
+          const { rawCode, verificationCode } = await this._createVerificationCodeService.execute(
+            tsx,
+            {
+              user_id: user.id,
+              code_type: codeType,
+            },
+          );
+
+          return {
+            success: true,
+            rawCode,
+            code_type: verificationCode.type,
+            can_resend_at_timestamp: verificationCode.can_resend_at.getTime(),
+          };
+        },
+      );
 
     if (success && code_type && rawCode)
       await this._sendVerificationCodeEmailService.execute({
@@ -82,7 +99,7 @@ export class SendVerificationCodeUsecase implements IUsecase {
         toEmail: data.email,
       });
 
-    return success;
+    return { success, can_resend_at_timestamp: can_resend_at_timestamp! };
   };
 }
 
