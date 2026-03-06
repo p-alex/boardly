@@ -1,22 +1,22 @@
 import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
-import { VerificationCodeType } from "../../application/services/verificationCode/index.js";
+import { VerificationCode } from "../../../generated/prisma_client/client.js";
 
-export class VerificationCodeMapper {
+export class VerificationCodeTypeMapper {
   private readonly _map: Record<
     verificationCodeFieldValidations.VerificationCodeType,
-    VerificationCodeType
+    VerificationCode["type"]
   >;
   constructor() {
-    this._map = { EMAIL_VERIFICATION: "emailVerificationCode" };
+    this._map = { EMAIL_VERIFICATION: "EMAIL_VERIFICATION" };
   }
 
   map = (
     codeTypeDto: verificationCodeFieldValidations.VerificationCodeType,
-  ): VerificationCodeType => {
+  ): VerificationCode["type"] => {
     return this._map[codeTypeDto];
   };
 }
 
-const verificationCodeMapper = new VerificationCodeMapper();
+const verificationCodeTypeMapper = new VerificationCodeTypeMapper();
 
-export default verificationCodeMapper;
+export default verificationCodeTypeMapper;

@@ -27,7 +27,7 @@ describe("sendEmailVerificationCodeApi", () => {
 
     expect(mockedAxios.post).toHaveBeenCalledOnce();
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      import.meta.env.VITE_SERVER_BASE_URL + "/auth/send-email-verification-code",
+      import.meta.env.VITE_SERVER_BASE_URL + "/auth/send-verification-code",
       data,
     );
   });

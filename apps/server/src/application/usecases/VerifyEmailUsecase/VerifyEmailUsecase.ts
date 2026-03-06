@@ -20,20 +20,17 @@ export class VerifyEmailUsecase implements IUsecase {
         await this._validateVerificationCodeService.execute(tsx, {
           email: data.email,
           code: data.code,
-          code_type: "emailVerificationCode",
+          code_type: "EMAIL_VERIFICATION",
         });
 
       if (!isCodeValid) {
-        await this._rateLimitVerificationCodeService.execute(null, {
-          verificationCode,
-          code_type: "emailVerificationCode",
-        });
+        await this._rateLimitVerificationCodeService.execute(null, { verificationCode });
         throw new ValidationException("Invalid or expired code");
       }
 
       await tsx.user.update({ where: { id: user.id }, data: { email_verified: true } });
 
-      await tsx.emailVerificationCode.delete({ where: { id: verificationCode.id } });
+      await tsx.verificationCode.delete({ where: { id: verificationCode.id } });
 
       return true;
     });

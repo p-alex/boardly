@@ -1,100 +1,215 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { SendVerificationCodeUsecase } from "./SendVerificationCodeUsecase.js";
-import NotFoundException from "../../../exceptions/NotFoundException.js";
-import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
-import { mockUser } from "../../../__fixtures__/user/mockUser.js";
-import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
-import verificationCodeMapper from "../../../domain/mappers/VerificationCodeMapper.js";
+import { Mock, Mocked, vi } from "vitest";
 
-// TODO: UNIFY VERIFICATION CODES
+import { PrismaClient } from "../../../../generated/prisma_client/client";
+import { SendVerificationCodeUsecase } from "./SendVerificationCodeUsecase";
+import { UserEmailFinderService } from "../../services/user/UserEmailFinderService";
+import { CreateVerificationCodeService } from "../../services/verificationCode/CreateVerificationCodeService";
+import { VerificationCodeTypeMapper } from "../../../domain/mappers/VerificationCodeMapper";
+import { RefreshVerificationCodeService } from "../../services/verificationCode/RefreshVerificationCodeService";
+import { SendVerificationCodeEmailService } from "../../services/verificationCode/SendVerificationCodeEmailService";
+import { PrismaTsx } from "../../services";
+import { userFixtures, verificationCodeFixtures } from "../../../__fixtures__";
 
-// Mock dependencies
-const prismaMock = {
-  $transaction: vi.fn(),
-};
+describe("SendVerificationCodeUsecase.ts (unit)", () => {
+  let prismaTsxMock: Mocked<PrismaTsx>;
+  let prismaMock: Mocked<PrismaClient>;
+  let userEmailFinderService: Mocked<UserEmailFinderService>;
+  let createVerificationCodeService: Mocked<CreateVerificationCodeService>;
+  let verificationCodeTypeMapper: Mocked<VerificationCodeTypeMapper>;
+  let refreshVerificationCodeService: Mocked<RefreshVerificationCodeService>;
+  let sendVerificationCodeEmailService: Mocked<SendVerificationCodeEmailService>;
+  let shouldSendBasedOnCodeType: Mock;
 
-const userEmailFinderServiceMock = {
-  execute: vi.fn(),
-};
+  let sendVerificationCodeUsecase: SendVerificationCodeUsecase;
 
-const emailVerificationCodeCreatorServiceMock = {
-  execute: vi.fn(),
-};
+  beforeEach(() => {
+    prismaTsxMock = {
+      verificationCode: {
+        findFirst: vi.fn(),
+      },
+    } as unknown as Mocked<PrismaTsx>;
 
-const mailerMock = {
-  send: vi.fn(),
-};
+    prismaMock = {
+      $transaction: vi.fn((cb) => cb(prismaTsxMock)),
+    } as unknown as Mocked<PrismaClient>;
 
-const getEmailVerificationTemplateMock = vi.fn();
+    userEmailFinderService = {
+      execute: vi.fn(),
+    } as unknown as Mocked<UserEmailFinderService>;
 
-let usecase: SendVerificationCodeUsecase;
+    createVerificationCodeService = {
+      execute: vi.fn(),
+    } as unknown as Mocked<CreateVerificationCodeService>;
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  usecase = new SendVerificationCodeUsecase(
-    prismaMock as any,
-    userEmailFinderServiceMock as any,
-    emailVerificationCodeCreatorServiceMock as any,
-    mailerMock as any,
-    getEmailVerificationTemplateMock as any,
-    verificationCodeMapper,
-  );
-});
+    verificationCodeTypeMapper = {
+      map: vi.fn().mockReturnValue("mapped code_type"),
+    } as unknown as Mocked<VerificationCodeTypeMapper>;
 
-describe("SendEmailVerificationCodeUsecase", () => {
-  it("should return true if user does not exist", async () => {
-    userEmailFinderServiceMock.execute.mockResolvedValue({ user: null });
-    prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
+    refreshVerificationCodeService = {
+      execute: vi.fn(),
+    } as unknown as Mocked<RefreshVerificationCodeService>;
 
-    const result = await usecase.execute({
-      email: "test@example.com",
-      code_type: "EMAIL_VERIFICATION",
-    });
+    sendVerificationCodeEmailService = {
+      execute: vi.fn(),
+    } as unknown as Mocked<SendVerificationCodeEmailService>;
 
-    expect(result).toBe(true);
+    shouldSendBasedOnCodeType = vi.fn();
 
-    expect(userEmailFinderServiceMock.execute).toHaveBeenCalledWith(prismaMock, {
-      email: "test@example.com",
-    });
+    sendVerificationCodeUsecase = new SendVerificationCodeUsecase(
+      prismaMock,
+      userEmailFinderService,
+      createVerificationCodeService,
+      verificationCodeTypeMapper,
+      refreshVerificationCodeService,
+      sendVerificationCodeEmailService,
+      shouldSendBasedOnCodeType,
+    );
   });
 
-  it("should return true if email is already verified", async () => {
-    userEmailFinderServiceMock.execute.mockResolvedValue({
-      user: { ...mockUser, email_verified: true },
+  it("should not send verification code email if user does not exist and return false", async () => {
+    userEmailFinderService.execute.mockResolvedValue({
+      user: null,
+      foundWithInactiveSecret: false,
     });
-    prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
 
-    const result = await usecase.execute({
-      email: "test@example.com",
+    const result = await sendVerificationCodeUsecase.execute({
+      email: "email@email.com",
       code_type: "EMAIL_VERIFICATION",
+    });
+
+    expect(userEmailFinderService.execute).toHaveBeenCalledWith(prismaTsxMock, {
+      email: "email@email.com",
+    });
+
+    expect(sendVerificationCodeEmailService.execute).not.toHaveBeenCalled();
+
+    expect(result).toBe(false);
+  });
+
+  it("should not send verification code if it cannot be sent based on code type", async () => {
+    userEmailFinderService.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    shouldSendBasedOnCodeType.mockReturnValue(false);
+
+    const result = await sendVerificationCodeUsecase.execute({
+      code_type: "EMAIL_VERIFICATION",
+      email: "email@email.com",
+    });
+
+    expect(shouldSendBasedOnCodeType).toHaveBeenCalledWith({
+      code_type: "mapped code_type",
+      user: userFixtures.mockUser,
+    });
+
+    expect(sendVerificationCodeEmailService.execute).not.toHaveBeenCalled();
+
+    expect(result).toBe(false);
+  });
+
+  it("should refresh the verification code if there is one active already, and send it", async () => {
+    userEmailFinderService.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    shouldSendBasedOnCodeType.mockReturnValue(true);
+
+    (prismaTsxMock.verificationCode.findFirst as Mock).mockResolvedValue(
+      verificationCodeFixtures.verificationCodeMock,
+    );
+
+    refreshVerificationCodeService.execute.mockResolvedValue({
+      rawCode: "111111",
+      refreshedVerificationCode: verificationCodeFixtures.verificationCodeMock,
+    });
+
+    const result = await sendVerificationCodeUsecase.execute({
+      email: "email@email.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
+
+    expect(verificationCodeTypeMapper.map).toHaveBeenCalledWith("EMAIL_VERIFICATION");
+
+    expect(prismaTsxMock.verificationCode.findFirst).toHaveBeenCalledWith({
+      where: { user_id: userFixtures.mockUser.id, type: "mapped code_type" },
+    });
+
+    expect(refreshVerificationCodeService.execute).toHaveBeenCalledWith(prismaTsxMock, {
+      user_id: userFixtures.mockUser.id,
+      verificationCode: verificationCodeFixtures.verificationCodeMock,
+    });
+
+    expect(sendVerificationCodeEmailService.execute).toHaveBeenCalledWith({
+      code_type: "EMAIL_VERIFICATION",
+      rawCode: "111111",
+      toEmail: "email@email.com",
     });
 
     expect(result).toBe(true);
   });
 
-  it("should create verification code, send email, and return true", async () => {
-    userEmailFinderServiceMock.execute.mockResolvedValue({
-      user: mockUser,
+  it("should create a new verification code with a mapped code type if there is no active one, and send it", async () => {
+    userEmailFinderService.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
     });
 
-    emailVerificationCodeCreatorServiceMock.execute.mockResolvedValue({
-      code: "123456",
+    shouldSendBasedOnCodeType.mockReturnValue(true);
+
+    (prismaTsxMock.verificationCode.findFirst as Mock).mockResolvedValue(null);
+
+    createVerificationCodeService.execute.mockResolvedValue({
+      rawCode: "111111",
+      verificationCode: verificationCodeFixtures.verificationCodeMock,
     });
 
-    getEmailVerificationTemplateMock.mockReturnValue("template content");
-
-    prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
-
-    const result = await usecase.execute({
-      email: "test@example.com",
+    const result = await sendVerificationCodeUsecase.execute({
+      email: "email@email.com",
       code_type: "EMAIL_VERIFICATION",
     });
 
-    expect(result).toBe(true);
-    expect(emailVerificationCodeCreatorServiceMock.execute).toHaveBeenCalledWith(prismaMock, {
-      user_id: "id",
-      code_type: "emailVerificationCode",
+    expect(verificationCodeTypeMapper.map).toHaveBeenCalledWith("EMAIL_VERIFICATION");
+
+    expect(refreshVerificationCodeService.execute).not.toHaveBeenCalled();
+
+    expect(createVerificationCodeService.execute).toHaveBeenCalledWith(prismaTsxMock, {
+      user_id: userFixtures.mockUser.id,
+      code_type: "mapped code_type",
     });
-    expect(mailerMock.send).toHaveBeenCalledWith("template content", "test@example.com");
+
+    expect(sendVerificationCodeEmailService.execute).toHaveBeenCalledWith({
+      code_type: "EMAIL_VERIFICATION",
+      rawCode: "111111",
+      toEmail: "email@email.com",
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it("should not send verification code if verification code refresh fails", async () => {
+    userEmailFinderService.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    shouldSendBasedOnCodeType.mockReturnValue(true);
+
+    (prismaTsxMock.verificationCode.findFirst as Mock).mockResolvedValue(
+      verificationCodeFixtures.verificationCodeMock,
+    );
+
+    refreshVerificationCodeService.execute.mockRejectedValue(new Error("error"));
+
+    await expect(
+      sendVerificationCodeUsecase.execute({
+        code_type: "EMAIL_VERIFICATION",
+        email: "email@email.com",
+      }),
+    ).rejects.toThrow("error");
+
+    expect(sendVerificationCodeEmailService.execute).not.toHaveBeenCalled();
   });
 });

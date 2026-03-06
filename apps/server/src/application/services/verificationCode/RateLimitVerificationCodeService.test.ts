@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
 import { RateLimitVerificationCodeService } from "./RateLimitVerificationCodeService";
 import type { UserLockChecker } from "../../../domain/services/user/UserLockChecker/UserLockChecker.js";
 import type { VerificationCodeLockChecker } from "../../../domain/services/verificationCode/VerificationCodeLockChecker.js";
-import type { VerificationCode } from "../../../domain/services/verificationCode/index.js";
 import { prisma } from "../../../prisma.js";
+import { VerificationCode } from "../../../../generated/prisma_client/client.js";
 
 vi.mock("../../../prisma.js", () => ({
   prisma: {
-    emailVerificationCode: {
+    verificationCode: {
       update: vi.fn(),
     },
     user: {
@@ -59,26 +59,24 @@ describe("RateLimitVerificationCodeService", () => {
 
   it("increments attempts without locking if below threshold", async () => {
     const code = makeVerificationCode({ attempts: 3 });
-    (prisma.emailVerificationCode.update as Mock).mockResolvedValueOnce({ ...code, attempts: 4 });
+    (prisma.verificationCode.update as Mock).mockResolvedValueOnce({ ...code, attempts: 4 });
 
     const result = await service.execute(prisma as any, {
       verificationCode: code,
-      code_type: "emailVerificationCode",
     });
 
-    expect(prisma.emailVerificationCode.update).toHaveBeenCalledTimes(1);
+    expect(prisma.verificationCode.update).toHaveBeenCalledTimes(1);
     expect(result.updatedVerificationCode.attempts).toBe(4);
   });
 
   it("locks verification code if attempts reach code threshold", async () => {
     const code = makeVerificationCode({ attempts: 5 });
-    (prisma.emailVerificationCode.update as Mock)
+    (prisma.verificationCode.update as Mock)
       .mockResolvedValueOnce({ ...code, attempts: 6 }) // first increment
       .mockResolvedValueOnce({ ...code, attempts: 6, lock_until: new Date(NOW + 1000 * 60 * 10) }); // lock applied
 
     const result = await service.execute(prisma as any, {
       verificationCode: code,
-      code_type: "emailVerificationCode",
     });
 
     expect(verificationCodeLockCheckerMock.getLockDuration).toHaveBeenCalled();
@@ -87,7 +85,7 @@ describe("RateLimitVerificationCodeService", () => {
 
   it("locks user if attempts reach user threshold", async () => {
     const code = makeVerificationCode({ attempts: 10 });
-    (prisma.emailVerificationCode.update as Mock)
+    (prisma.verificationCode.update as Mock)
       .mockResolvedValueOnce({ ...code, attempts: 11 }) // increment
       .mockResolvedValueOnce({ ...code, attempts: 11, lock_until: new Date(NOW + 1000 * 60 * 10) }); // code lock applied
 
@@ -98,7 +96,6 @@ describe("RateLimitVerificationCodeService", () => {
 
     await service.execute(prisma as any, {
       verificationCode: code,
-      code_type: "emailVerificationCode",
     });
 
     expect(userLockCheckerMock.getHardLockDate).toHaveBeenCalled();

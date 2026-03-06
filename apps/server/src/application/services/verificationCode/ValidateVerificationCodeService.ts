@@ -1,30 +1,26 @@
+import { VerificationCode } from "../../../../generated/prisma_client/client.js";
 import userLockChecker, {
   UserLockChecker,
 } from "../../../domain/services/user/UserLockChecker/UserLockChecker.js";
-import verificationCodeHashValidator, {
-  VerificationCodeHashValidator,
-} from "../../../domain/services/verificationCode/VerificationCodeHashValidator.js";
-import verificationCodePolicy, {
-  VerificationCodePolicy,
-} from "../../../domain/services/verificationCode/VerificationCodePolicy.js";
+import verificationCodeChecker, {
+  VerificationCodeChecker,
+} from "../../../domain/services/verificationCode/VerificationCodeChecker.js";
 import TooManyRequestsException from "../../../exceptions/TooManyRequestsException.js";
 import ValidationException from "../../../exceptions/ValidationException.js";
 import { prisma } from "../../../prisma.js";
 import { IService, PrismaTsx } from "../index.js";
 import userEmailFinderService, { UserEmailFinderService } from "../user/UserEmailFinderService.js";
-import { VerificationCodeType } from "./index.js";
 
 export class ValidateVerificationCodeService implements IService {
   constructor(
     private readonly _userEmailFinderService: UserEmailFinderService,
     private readonly _userLockChecker: UserLockChecker,
-    private readonly _verificationCodePolicy: VerificationCodePolicy,
-    private readonly _verificationCodeHashValidator: VerificationCodeHashValidator,
+    private readonly _verificationCodeChecker: VerificationCodeChecker,
   ) {}
 
   execute = async (
     tsx: PrismaTsx | null,
-    data: { email: string; code: string; code_type: VerificationCodeType },
+    data: { email: string; code: string; code_type: VerificationCode["type"] },
   ) => {
     const dbClient = tsx ? tsx : prisma;
 
@@ -34,22 +30,23 @@ export class ValidateVerificationCodeService implements IService {
 
     const isUserLocked = this._userLockChecker.isLocked(user);
 
-    if (isUserLocked)
-      throw new TooManyRequestsException("Account is temporarly locked. Try again later", {});
+    if (isUserLocked) throw new ValidationException("Invalid or expired code");
 
-    let verificationCode = await dbClient[data.code_type].findUnique({
-      where: { user_id: user.id },
+    let verificationCode = await dbClient.verificationCode.findFirst({
+      where: { user_id: user.id, type: data.code_type },
     });
 
     if (!verificationCode) throw new ValidationException("Invalid or expired code");
 
-    this._verificationCodePolicy.validateExistenceAndStatus(verificationCode);
+    const isLocked = this._verificationCodeChecker.isLocked(verificationCode);
 
-    const isCodeValid = this._verificationCodeHashValidator.isValid({
-      code_hash: verificationCode.code_hash,
-      code_raw: data.code,
-      code_type: "EMAIL_VERIFICATION",
-    });
+    if (isLocked) throw new ValidationException("Invalid or expired code");
+
+    const isExpired = this._verificationCodeChecker.isExpired(verificationCode);
+
+    if (isExpired) throw new ValidationException("Invalid or expired code");
+
+    const isCodeValid = this._verificationCodeChecker.isValidHash(data.code, verificationCode);
 
     return { user, verificationCode, isCodeValid };
   };
@@ -58,8 +55,7 @@ export class ValidateVerificationCodeService implements IService {
 const validateVerificationCodeService = new ValidateVerificationCodeService(
   userEmailFinderService,
   userLockChecker,
-  verificationCodePolicy,
-  verificationCodeHashValidator,
+  verificationCodeChecker,
 );
 
 export default validateVerificationCodeService;

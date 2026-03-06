@@ -3,50 +3,86 @@ import { prisma } from "../../../prisma.js";
 import createVerificationCodeService, {
   CreateVerificationCodeService,
 } from "../../services/verificationCode/CreateVerificationCodeService.js";
-import { PrismaClient } from "../../../../generated/prisma_client/client.js";
+import { PrismaClient, VerificationCode } from "../../../../generated/prisma_client/client.js";
 import userEmailFinderService, {
   UserEmailFinderService,
 } from "../../services/user/UserEmailFinderService.js";
-import Mailer from "../../../Mailer/Mailer.js";
-import getEmailVerificationTemplate, {
-  GetEmailVerificationTemplate,
-} from "../../../Mailer/emailTemplates/emailVerificationTemplate.js";
-import { mailer } from "../../../Mailer/index.js";
 import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
 import verificationCodeMapper, {
-  VerificationCodeMapper,
+  VerificationCodeTypeMapper,
 } from "../../../domain/mappers/VerificationCodeMapper.js";
+import refreshVerificationCodeService, {
+  RefreshVerificationCodeService,
+} from "../../services/verificationCode/RefreshVerificationCodeService.js";
+import sendVerificationCodeEmailService, {
+  SendVerificationCodeEmailService,
+} from "../../services/verificationCode/SendVerificationCodeEmailService.js";
+import shouldSendVerificationCodeBasedOnType from "../../../domain/services/verificationCode/shouldSendVerificationCodeBasedOnType.js";
 
 export class SendVerificationCodeUsecase implements IUsecase {
   constructor(
     private readonly _prisma: PrismaClient,
     private readonly _userEmailFinderService: UserEmailFinderService,
     private readonly _createVerificationCodeService: CreateVerificationCodeService,
-    private readonly _mailer: Mailer,
-    private readonly _getEmailVerificationTemplate: GetEmailVerificationTemplate,
-    private readonly _verificationCodeMapper: VerificationCodeMapper,
+    private readonly _verificationCodeTypeMapper: VerificationCodeTypeMapper,
+    private readonly _refreshVerificationCodeService: RefreshVerificationCodeService,
+    private readonly _sendVerificationCodeEmailService: SendVerificationCodeEmailService,
+    private readonly _shouldSendVerificationCodeBasedOnType: typeof shouldSendVerificationCodeBasedOnType,
   ) {}
 
   execute = async (data: {
     email: string;
     code_type: verificationCodeFieldValidations.VerificationCodeType;
   }) => {
-    return await this._prisma.$transaction(async (tsx) => {
-      const { user } = await this._userEmailFinderService.execute(tsx, { email: data.email });
+    const { success, rawCode, code_type } = await this._prisma.$transaction(
+      async (
+        tsx,
+      ): Promise<{ success: boolean; rawCode?: string; code_type?: VerificationCode["type"] }> => {
+        const { user } = await this._userEmailFinderService.execute(tsx, { email: data.email });
 
-      if (!user) return true;
+        if (!user) return { success: false };
 
-      if (user.email_verified === true) return true;
+        const codeType = this._verificationCodeTypeMapper.map(data.code_type);
 
-      const { code } = await this._createVerificationCodeService.execute(tsx, {
-        user_id: user.id,
-        code_type: this._verificationCodeMapper.map(data.code_type),
+        const shouldSendBasedOnCodeType = this._shouldSendVerificationCodeBasedOnType({
+          code_type: codeType,
+          user,
+        });
+        if (!shouldSendBasedOnCodeType) return { success: false };
+
+        const activeCode = await tsx.verificationCode.findFirst({
+          where: { user_id: user.id, type: codeType },
+        });
+
+        if (activeCode) {
+          const refreshResult = await this._refreshVerificationCodeService.execute(tsx, {
+            user_id: user.id,
+            verificationCode: activeCode,
+          });
+
+          return { success: true, rawCode: refreshResult.rawCode, code_type: activeCode.type };
+        }
+
+        const { rawCode, verificationCode } = await this._createVerificationCodeService.execute(
+          tsx,
+          {
+            user_id: user.id,
+            code_type: codeType,
+          },
+        );
+
+        return { success: true, rawCode, code_type: verificationCode.type };
+      },
+    );
+
+    if (success && code_type && rawCode)
+      await this._sendVerificationCodeEmailService.execute({
+        code_type,
+        rawCode,
+        toEmail: data.email,
       });
 
-      await this._mailer.send(this._getEmailVerificationTemplate(code), data.email);
-
-      return true;
-    });
+    return success;
   };
 }
 
@@ -54,9 +90,10 @@ const sendVerificationCodeUsecase = new SendVerificationCodeUsecase(
   prisma,
   userEmailFinderService,
   createVerificationCodeService,
-  mailer,
-  getEmailVerificationTemplate,
   verificationCodeMapper,
+  refreshVerificationCodeService,
+  sendVerificationCodeEmailService,
+  shouldSendVerificationCodeBasedOnType,
 );
 
 export default sendVerificationCodeUsecase;

@@ -22,6 +22,10 @@ enum SecretVersions {
   V2
 }
 
+enum VerificationCodeType {
+  EMAIL_VERIFICATION
+}
+
 model User {
   id                              String         @id
   username                        String         @unique
@@ -34,8 +38,8 @@ model User {
   updated_at                      DateTime       @updatedAt
   created_at                      DateTime       @default(now())
 
-  passwordAuth          UserPasswordAuth?
-  emailVerificationCode EmailVerificationCode?
+  passwordAuth     UserPasswordAuth?
+  verificationCode VerificationCode?
 
   @@map("users")
 }
@@ -53,18 +57,19 @@ model UserPasswordAuth {
   @@map("user_password_auth")
 }
 
-model EmailVerificationCode {
-  id                String    @id
-  user_id           String    @unique
+model VerificationCode {
+  id                String               @id
+  user_id           String               @unique
   code_hash         String
   expires_at        DateTime
-  resend_code_count Int       @default(0)
+  resend_code_count Int                  @default(0)
   can_resend_at     DateTime
-  attempts          Int       @default(0)
+  attempts          Int                  @default(0)
   last_attempt_at   DateTime?
   lock_until        DateTime?
+  type              VerificationCodeType
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@map("email_verification_codes")
+  @@map("verification_codes")
 }

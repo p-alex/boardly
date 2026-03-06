@@ -13,7 +13,7 @@ const authRouter = Router();
 
 authRouter.post(
   "/password-sign-up",
-  expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 10 })),
+  expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 15 })),
   expressMiddlewareAdapter.adapt(resourceValidator.setup({ schema: signUpRequestDtoSchema })),
   expressControllerAdapter.adapt(emailSignUpController),
 );
@@ -29,7 +29,7 @@ authRouter.post(
 
 authRouter.post(
   "/verify-email",
-  expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 10 })),
+  expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 * 60 * 30 })),
   expressMiddlewareAdapter.adapt(resourceValidator.setup({ schema: verifyEmailRequestDtoSchema })),
   expressControllerAdapter.adapt(verifiyEmailController),
 );

@@ -1,13 +1,12 @@
+import { VerificationCode } from "../../../../generated/prisma_client/client.js";
 import userLockChecker, {
   UserLockChecker,
 } from "../../../domain/services/user/UserLockChecker/UserLockChecker.js";
-import { VerificationCode } from "../../../domain/services/verificationCode/index.js";
 import verificationCodeLockerChecker, {
   VerificationCodeLockChecker,
 } from "../../../domain/services/verificationCode/VerificationCodeLockChecker.js";
 import { prisma } from "../../../prisma.js";
 import { IService, PrismaTsx } from "../index.js";
-import { VerificationCodeType } from "./index.js";
 
 export class RateLimitVerificationCodeService implements IService {
   private readonly _codeLockThreshold = 5;
@@ -18,11 +17,8 @@ export class RateLimitVerificationCodeService implements IService {
     private readonly _verificationCodeLockChecker: VerificationCodeLockChecker,
   ) {}
 
-  execute = async (
-    _: PrismaTsx | null,
-    data: { verificationCode: VerificationCode; code_type: VerificationCodeType },
-  ) => {
-    let updatedVerificationCode = await prisma[data.code_type].update({
+  execute = async (_: PrismaTsx | null, data: { verificationCode: VerificationCode }) => {
+    let updatedVerificationCode = await prisma.verificationCode.update({
       data: {
         attempts: { increment: 1 },
         last_attempt_at: new Date(),
@@ -31,7 +27,7 @@ export class RateLimitVerificationCodeService implements IService {
     });
 
     if (updatedVerificationCode.attempts >= this._codeLockThreshold) {
-      updatedVerificationCode = await prisma[data.code_type].update({
+      updatedVerificationCode = await prisma.verificationCode.update({
         data: { lock_until: this._verificationCodeLockChecker.getLockDuration() },
         where: { id: updatedVerificationCode.id },
       });

@@ -1,116 +1,296 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Mock, Mocked, vi } from "vitest";
+import { UserEmailFinderService } from "../user/UserEmailFinderService";
+import { UserLockChecker } from "../../../domain/services/user/UserLockChecker/UserLockChecker";
+import { VerificationCodeChecker } from "../../../domain/services/verificationCode/VerificationCodeChecker";
+import { prisma } from "../../../prisma";
+import { userFixtures, verificationCodeFixtures } from "../../../__fixtures__";
+
+vi.mock("../../../prisma.js", () => ({
+  prisma: {
+    verificationCode: {
+      findFirst: vi.fn(),
+    },
+  },
+}));
+
 import { ValidateVerificationCodeService } from "./ValidateVerificationCodeService";
-import type { UserEmailFinderService } from "../user/UserEmailFinderService.js";
-import type { UserLockChecker } from "../../../domain/services/user/UserLockChecker/UserLockChecker.js";
-import type { VerificationCodePolicy } from "../../../domain/services/verificationCode/VerificationCodePolicy.js";
-import type { VerificationCodeHashValidator } from "../../../domain/services/verificationCode/VerificationCodeHashValidator.js";
-import ValidationException from "../../../exceptions/ValidationException.js";
-import TooManyRequestsException from "../../../exceptions/TooManyRequestsException.js";
+import ValidationException from "../../../exceptions/ValidationException";
+import { VerificationCode } from "../../../../generated/prisma_client/client";
+import TooManyRequestsException from "../../../exceptions/TooManyRequestsException";
+import { PrismaTsx } from "..";
 
-describe("ValidateVerificationCodeService", () => {
-  let userEmailFinderServiceMock: UserEmailFinderService;
-  let userLockCheckerMock: UserLockChecker;
-  let verificationCodePolicyMock: VerificationCodePolicy;
-  let verificationCodeHashValidatorMock: VerificationCodeHashValidator;
-  let service: ValidateVerificationCodeService;
+describe("ValidateVerificationCodeService.ts (unit)", () => {
+  let validateVerificationCodeService: ValidateVerificationCodeService;
 
-  const mockUser = { id: "user-1", hard_lock_until: null };
-  const mockCode = { code_hash: "hash123", expires_at: new Date(Date.now() + 1000 * 60) };
+  let userEmailFinderServiceMock: Mocked<UserEmailFinderService>;
+  let userLockCheckerMock: Mocked<UserLockChecker>;
+  let verificationCodeCheckerMock: Mocked<VerificationCodeChecker>;
 
-  beforeEach(() => {
-    // Mock dependencies
+  const CODE = "123456";
+  const CODE_TYPE: VerificationCode["type"] = "EMAIL_VERIFICATION";
+  const EMAIL = "email@email.com";
+
+  beforeEach(async () => {
     userEmailFinderServiceMock = {
-      execute: vi.fn().mockResolvedValue({ user: mockUser }),
-    } as unknown as UserEmailFinderService;
+      execute: vi.fn(),
+    } as unknown as Mocked<UserEmailFinderService>;
 
     userLockCheckerMock = {
-      isLocked: vi.fn().mockReturnValue(false),
-    } as unknown as UserLockChecker;
+      isLocked: vi.fn(),
+    } as unknown as Mocked<UserLockChecker>;
 
-    verificationCodePolicyMock = {
-      validateExistenceAndStatus: vi.fn(),
-    } as unknown as VerificationCodePolicy;
+    verificationCodeCheckerMock = {
+      isLocked: vi.fn(),
+      isExpired: vi.fn(),
+      isValidHash: vi.fn(),
+    } as unknown as Mocked<VerificationCodeChecker>;
 
-    verificationCodeHashValidatorMock = {
-      isValid: vi.fn().mockReturnValue(true),
-    } as unknown as VerificationCodeHashValidator;
+    vi.doMock("../../../prisma.js", () => ({
+      prisma: {
+        verificationCode: {
+          findFirst: vi.fn(),
+        },
+      },
+    }));
 
-    service = new ValidateVerificationCodeService(
+    validateVerificationCodeService = new ValidateVerificationCodeService(
       userEmailFinderServiceMock,
       userLockCheckerMock,
-      verificationCodePolicyMock,
-      verificationCodeHashValidatorMock,
+      verificationCodeCheckerMock,
     );
   });
 
-  it("throws ValidationException if user not found", async () => {
-    (userEmailFinderServiceMock.execute as any).mockResolvedValue({ user: null });
-
-    await expect(
-      service.execute(null, {
-        email: "test@example.com",
-        code: "123456",
-        code_type: "emailVerificationCode",
-      }),
-    ).rejects.toThrowError(ValidationException);
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
-  it("throws TooManyRequestsException if user is locked", async () => {
-    (userLockCheckerMock.isLocked as any).mockReturnValue(true);
+  it("throws validation exception if there is no user", async () => {
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: null,
+      foundWithInactiveSecret: false,
+    });
 
     await expect(
-      service.execute(null, {
-        email: "test@example.com",
-        code: "123456",
-        code_type: "emailVerificationCode",
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
       }),
-    ).rejects.toThrowError(TooManyRequestsException);
-  });
-
-  it("throws ValidationException if verification code not found", async () => {
-    const dbMock = { emailVerificationCode: { findUnique: vi.fn().mockResolvedValue(null) } };
+    ).rejects.toThrow(ValidationException);
 
     await expect(
-      service.execute(dbMock as any, {
-        email: "test@example.com",
-        code: "123456",
-        code_type: "emailVerificationCode",
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
       }),
-    ).rejects.toThrowError(ValidationException);
+    ).rejects.toThrow("Invalid or expired code");
+
+    expect(userEmailFinderServiceMock.execute).toHaveBeenCalledWith(prisma, {
+      email: "email@email.com",
+    });
   });
 
-  it("calls VerificationCodePolicy.validateExistenceAndStatus", async () => {
-    const dbMock = {
-      emailVerificationCode: { findUnique: vi.fn().mockResolvedValue(mockCode) },
+  it("throws too many requests exception if user is locked", async () => {
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    userLockCheckerMock.isLocked.mockReturnValue(true);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow(ValidationException);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow("Invalid or expired code");
+  });
+
+  it("throws validation exception if there is no validation code in the db", async () => {
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    userLockCheckerMock.isLocked.mockReturnValue(false);
+
+    (prisma.verificationCode.findFirst as Mock).mockResolvedValue(null);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow(ValidationException);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow("Invalid or expired code");
+  });
+
+  it("throws validation exception if the verification code found is locked", async () => {
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    userLockCheckerMock.isLocked.mockReturnValue(false);
+
+    (prisma.verificationCode.findFirst as Mock).mockResolvedValue(
+      verificationCodeFixtures.verificationCodeMock,
+    );
+
+    verificationCodeCheckerMock.isLocked.mockReturnValue(true);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow(ValidationException);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow("Invalid or expired code");
+  });
+
+  it("throws validation exception if the verification code is expired", async () => {
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    userLockCheckerMock.isLocked.mockReturnValue(false);
+
+    (prisma.verificationCode.findFirst as Mock).mockResolvedValue(
+      verificationCodeFixtures.verificationCodeMock,
+    );
+
+    verificationCodeCheckerMock.isLocked.mockReturnValue(false);
+
+    verificationCodeCheckerMock.isExpired.mockReturnValue(true);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow(ValidationException);
+
+    await expect(
+      validateVerificationCodeService.execute(null, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      }),
+    ).rejects.toThrow("Invalid or expired code");
+  });
+
+  it("checks if the code is valid", async () => {
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    userLockCheckerMock.isLocked.mockReturnValue(false);
+
+    (prisma.verificationCode.findFirst as Mock).mockResolvedValue(
+      verificationCodeFixtures.verificationCodeMock,
+    );
+
+    verificationCodeCheckerMock.isLocked.mockReturnValue(false);
+
+    verificationCodeCheckerMock.isExpired.mockReturnValue(false);
+
+    await validateVerificationCodeService.execute(null, {
+      code: CODE,
+      code_type: CODE_TYPE,
+      email: EMAIL,
+    });
+
+    expect(verificationCodeCheckerMock.isValidHash).toHaveBeenCalledWith(
+      CODE,
+      verificationCodeFixtures.verificationCodeMock,
+    );
+  });
+
+  it("returns correctly", async () => {
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
+    });
+
+    userLockCheckerMock.isLocked.mockReturnValue(false);
+
+    (prisma.verificationCode.findFirst as Mock).mockResolvedValue(
+      verificationCodeFixtures.verificationCodeMock,
+    );
+
+    verificationCodeCheckerMock.isLocked.mockReturnValue(false);
+
+    verificationCodeCheckerMock.isExpired.mockReturnValue(false);
+
+    verificationCodeCheckerMock.isValidHash.mockReturnValue(true);
+
+    const result = await validateVerificationCodeService.execute(null, {
+      code: CODE,
+      code_type: CODE_TYPE,
+      email: EMAIL,
+    });
+
+    const expectedReturn: Awaited<ReturnType<ValidateVerificationCodeService["execute"]>> = {
+      isCodeValid: true,
+      user: userFixtures.mockUser,
+      verificationCode: verificationCodeFixtures.verificationCodeMock,
     };
 
-    await service.execute(dbMock as any, {
-      email: "test@example.com",
-      code: "123456",
-      code_type: "emailVerificationCode",
-    });
-
-    expect(verificationCodePolicyMock.validateExistenceAndStatus).toHaveBeenCalledWith(mockCode);
+    expect(result).toEqual(expectedReturn);
   });
 
-  it("returns correct values if all checks pass", async () => {
-    const dbMock = {
-      emailVerificationCode: { findUnique: vi.fn().mockResolvedValue(mockCode) },
-    };
+  it("uses transaction prisma if provided", async () => {
+    const prismaTsxMock = {
+      verificationCode: {
+        findFirst: vi.fn(),
+      },
+    } as unknown as PrismaTsx;
 
-    const result = await service.execute(dbMock as any, {
-      email: "test@example.com",
-      code: "123456",
-      code_type: "emailVerificationCode",
+    userEmailFinderServiceMock.execute.mockResolvedValue({
+      user: userFixtures.mockUser,
+      foundWithInactiveSecret: false,
     });
 
-    expect(result.user).toEqual(mockUser);
-    expect(result.verificationCode).toEqual(mockCode);
-    expect(result.isCodeValid).toBe(true);
-    expect(verificationCodeHashValidatorMock.isValid).toHaveBeenCalledWith({
-      code_hash: mockCode.code_hash,
-      code_raw: "123456",
-      code_type: "EMAIL_VERIFICATION",
-    });
+    userLockCheckerMock.isLocked.mockReturnValue(false);
+
+    try {
+      await validateVerificationCodeService.execute(prismaTsxMock, {
+        code: CODE,
+        code_type: CODE_TYPE,
+        email: EMAIL,
+      });
+    } catch (error) {
+      expect(prismaTsxMock.verificationCode.findFirst).toHaveBeenCalled();
+      expect(prisma.verificationCode.findFirst).not.toHaveBeenCalled();
+    }
   });
 });

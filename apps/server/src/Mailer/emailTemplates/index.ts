@@ -1,4 +1,4 @@
-import emailVerificationTemplate from "./emailVerificationTemplate.js";
+import emailVerificationTemplate from "./getVerificationCodeEmailTemplate.js";
 
 export interface EmailTemplate {
   subject: string;

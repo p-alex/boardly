@@ -1,84 +1,75 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { CryptoUtil } from "@boardly/shared/utils";
+import { vi } from "vitest";
+import { verificationCodeMock } from "../../../__fixtures__/verificationCode";
+import { VerificationCodeFactory } from "../../../domain/factories/VerificationCodeFactory";
 import { prisma } from "../../../prisma.js";
-import { verificationCodeFixtures } from "../../../__fixtures__/index.js";
-import { VerificationCodeFactory } from "../../../domain/factories/VerificationCodeFactory.js";
-import { CreateVerificationCodeService } from "./CreateVerificationCodeService.js";
 
-vi.mock("../../../prisma", () => ({
+vi.mock("../../../prisma.js", () => ({
   prisma: {
-    emailVerificationCode: {
+    verificationCode: {
       create: vi.fn(),
     },
   },
 }));
 
+import { CreateVerificationCodeService } from "./CreateVerificationCodeService";
+import { PrismaTsx } from "../index.js";
+
 describe("CreateVerificationCodeService.ts (unit)", () => {
-  let cryptoUtil: CryptoUtil;
-  let factory: VerificationCodeFactory;
-  let service: CreateVerificationCodeService;
+  let createVerificationCodeService: CreateVerificationCodeService;
 
-  beforeEach(() => {
-    cryptoUtil = {
-      generateCode: vi.fn(),
-    } as unknown as CryptoUtil;
+  let verificationCodeFactory: VerificationCodeFactory;
 
-    factory = {
-      create: vi.fn(),
+  beforeEach(async () => {
+    verificationCodeFactory = {
+      create: vi
+        .fn()
+        .mockReturnValue({ rawCode: "123456", verificationCode: verificationCodeMock }),
     } as unknown as VerificationCodeFactory;
 
-    service = new CreateVerificationCodeService(cryptoUtil, factory);
+    createVerificationCodeService = new CreateVerificationCodeService(verificationCodeFactory);
   });
 
   afterEach(() => {
     vi.resetAllMocks();
   });
 
-  it("should generate code, create entity, persist it and return result", async () => {
-    const user_id = "user-123";
-    const generatedCode = "ABCDEFGH";
-
-    vi.mocked(cryptoUtil.generateCode).mockReturnValue(generatedCode);
-    vi.mocked(factory.create).mockReturnValue(verificationCodeFixtures.verificationCodeMock);
-    vi.mocked(prisma.emailVerificationCode.create).mockResolvedValue(
-      verificationCodeFixtures.verificationCodeMock as any,
-    );
-
-    const result = await service.execute(null, { user_id, code_type: "emailVerificationCode" });
-
-    expect(cryptoUtil.generateCode).toHaveBeenCalledWith(6);
-
-    expect(factory.create).toHaveBeenCalledWith({
-      user_id,
-      code: generatedCode,
+  it("creates a new verification code", async () => {
+    await createVerificationCodeService.execute(null, {
+      code_type: "EMAIL_VERIFICATION",
+      user_id: "user_id",
     });
 
-    expect(prisma.emailVerificationCode.create).toHaveBeenCalledWith({
-      data: verificationCodeFixtures.verificationCodeMock,
-    });
-
-    expect(result).toEqual({
-      code: generatedCode,
-      verificationCode: verificationCodeFixtures.verificationCodeMock,
+    expect(verificationCodeFactory.create).toHaveBeenCalledWith({
+      user_id: "user_id",
+      type: "EMAIL_VERIFICATION",
     });
   });
 
-  it("should use provided transaction client instead of prisma", async () => {
-    const tx = {
-      emailVerificationCode: {
-        create: vi.fn(),
-      },
-    };
+  it("inserts the new verification code into the database", async () => {
+    await createVerificationCodeService.execute(null, {
+      code_type: "EMAIL_VERIFICATION",
+      user_id: "user_id",
+    });
 
-    const user_id = "user-123";
-    const generatedCode = "ABCDEFGH";
+    expect(prisma.verificationCode.create).toHaveBeenCalledWith({ data: verificationCodeMock });
+  });
 
-    vi.mocked(cryptoUtil.generateCode).mockReturnValue(generatedCode);
-    vi.mocked(factory.create).mockReturnValue({ test: true } as any);
+  it("returns correctly", async () => {
+    const result = await createVerificationCodeService.execute(null, {
+      code_type: "EMAIL_VERIFICATION",
+      user_id: "user_id",
+    });
+    expect(result).toEqual({ rawCode: "123456", verificationCode: verificationCodeMock });
+  });
 
-    await service.execute(tx as any, { user_id, code_type: "emailVerificationCode" });
+  it("uses prisma transaction if provided", async () => {
+    const tsxMock = { verificationCode: { create: vi.fn() } } as unknown as PrismaTsx;
 
-    expect(tx.emailVerificationCode.create).toHaveBeenCalled();
-    expect(prisma.emailVerificationCode.create).not.toHaveBeenCalled();
+    await createVerificationCodeService.execute(tsxMock, {
+      code_type: "EMAIL_VERIFICATION",
+      user_id: "user_id",
+    });
+
+    expect(tsxMock.verificationCode.create).toHaveBeenCalled();
   });
 });

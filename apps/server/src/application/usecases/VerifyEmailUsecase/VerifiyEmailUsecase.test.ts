@@ -4,8 +4,8 @@ import { VerifyEmailUsecase } from "./VerifyEmailUsecase";
 import { RateLimitVerificationCodeService } from "../../services/verificationCode/RateLimitVerificationCodeService";
 import { verificationCodeFixtures } from "../../../__fixtures__/index";
 import { mockUser } from "../../../__fixtures__/user";
-import { VerificationCodeType } from "../../services/verificationCode";
 import ValidationException from "../../../exceptions/ValidationException";
+import { VerificationCode } from "../../../../generated/prisma_client/client";
 
 describe("VerifiyEmailUsecase.ts (unit)", () => {
   let verifyEmailUsecase: VerifyEmailUsecase;
@@ -14,7 +14,7 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
     user: {
       update: vi.fn(),
     },
-    emailVerificationCode: {
+    verificationCode: {
       delete: vi.fn(),
     },
   };
@@ -57,7 +57,7 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
     expect(validateVerificationCodeService.execute).toHaveBeenCalledWith(prismaTsxMock, {
       email: "email@email.com",
       code: "123456",
-      code_type: "emailVerificationCode" as VerificationCodeType,
+      code_type: "EMAIL_VERIFICATION" as VerificationCode["type"],
     });
   });
 
@@ -73,7 +73,6 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
     } catch (error) {
       expect(rateLimitVerificationCodeService.execute).toHaveBeenCalledWith(null, {
         verificationCode: verificationCodeFixtures.verificationCodeMock,
-        code_type: "emailVerificationCode" as VerificationCodeType,
       });
     }
   });
@@ -102,7 +101,7 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
       data: { email_verified: true },
     });
 
-    expect(prismaTsxMock.emailVerificationCode.delete).toHaveBeenCalledWith({
+    expect(prismaTsxMock.verificationCode.delete).toHaveBeenCalledWith({
       where: { id: verificationCodeFixtures.verificationCodeMock.id },
     });
   });

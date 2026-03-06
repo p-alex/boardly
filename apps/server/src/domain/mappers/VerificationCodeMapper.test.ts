@@ -1,12 +1,12 @@
-import { VerificationCodeType } from "../../application/services/verificationCode";
-import { VerificationCodeMapper } from "./VerificationCodeMapper";
+import { VerificationCode } from "../../../generated/prisma_client/client";
+import { VerificationCodeTypeMapper } from "./VerificationCodeMapper";
 
 describe("VerificationCodeMapper.ts", () => {
-  const verificationCodeMapper = new VerificationCodeMapper();
+  const verificationCodeMapper = new VerificationCodeTypeMapper();
 
   it("maps email verification code type correctly", () => {
     expect(verificationCodeMapper.map("EMAIL_VERIFICATION")).toBe(
-      "emailVerificationCode" as VerificationCodeType,
+      "EMAIL_VERIFICATION" as VerificationCode["type"],
     );
   });
 });
