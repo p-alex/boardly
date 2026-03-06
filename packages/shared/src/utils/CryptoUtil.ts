@@ -1,9 +1,10 @@
 import argon2 from "argon2";
 import crypto_js from "crypto-js";
+import { v4 } from "uuid";
 
 export class CryptoUtil {
   randomUUID() {
-    return crypto.randomUUID();
+    return v4();
   }
 
   async hashPassword(text: string) {
