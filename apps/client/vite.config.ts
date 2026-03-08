@@ -34,7 +34,6 @@ export default defineConfig({
         "domain/entities/**",
         "infrastructure/dtos/**",
         "layouts/*",
-        "pages/*",
         "svgs",
       ],
     },

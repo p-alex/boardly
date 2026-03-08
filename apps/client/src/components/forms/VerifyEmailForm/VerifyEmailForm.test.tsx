@@ -59,7 +59,14 @@ describe("VerifyEmailForm.tsx (unit)", () => {
   });
 
   it("blocks user from submitting if form is invalid", async () => {
-    render(<VerifiyEmailForm email="email@email.com" />, { wrapper });
+    render(
+      <VerifiyEmailForm
+        email="email@email.com"
+        code_type="EMAIL_VERIFICATION"
+        onSuccess={() => {}}
+      />,
+      { wrapper },
+    );
 
     await fillInvalid();
 
@@ -70,7 +77,14 @@ describe("VerifyEmailForm.tsx (unit)", () => {
   });
 
   it("let's user submit if form is valid", async () => {
-    render(<VerifiyEmailForm email="email@email.com" />, { wrapper });
+    render(
+      <VerifiyEmailForm
+        email="email@email.com"
+        code_type="EMAIL_VERIFICATION"
+        onSuccess={() => {}}
+      />,
+      { wrapper },
+    );
 
     await fillValid();
 
@@ -78,7 +92,11 @@ describe("VerifyEmailForm.tsx (unit)", () => {
 
     await submit();
 
-    expect(verifyEmailApi).toHaveBeenCalledWith({ email: "email@email.com", code: "123456" });
+    expect(verifyEmailApi).toHaveBeenCalledWith({
+      email: "email@email.com",
+      code_type: "EMAIL_VERIFICATION",
+      code: "123456",
+    });
   });
 
   it("displays 'invalid of expired code' error message", async () => {
@@ -88,7 +106,14 @@ describe("VerifyEmailForm.tsx (unit)", () => {
       } as AxiosResponse),
     );
 
-    render(<VerifiyEmailForm email="email@email.com" />, { wrapper });
+    render(
+      <VerifiyEmailForm
+        email="email@email.com"
+        code_type="EMAIL_VERIFICATION"
+        onSuccess={() => {}}
+      />,
+      { wrapper },
+    );
 
     await fillValid();
 
@@ -107,7 +132,14 @@ describe("VerifyEmailForm.tsx (unit)", () => {
       } as AxiosResponse),
     );
 
-    render(<VerifiyEmailForm email="email@email.com" />, { wrapper });
+    render(
+      <VerifiyEmailForm
+        email="email@email.com"
+        code_type="EMAIL_VERIFICATION"
+        onSuccess={() => {}}
+      />,
+      { wrapper },
+    );
 
     await fillValid();
 
@@ -119,20 +151,17 @@ describe("VerifyEmailForm.tsx (unit)", () => {
     expect(error).toHaveTextContent("root error");
   });
 
-  it("navigates to /sign-in on successfull submission", async () => {
-    render(<VerifiyEmailForm email="email@email.com" />, { wrapper });
-
-    await fillValid();
-
-    await submit();
-
-    expect(navigateMock).toHaveBeenCalledWith("/sign-in");
-  });
-
   it("handles error of any type", async () => {
     (verifyEmailApi as Mock).mockRejectedValue(new Error());
 
-    render(<VerifiyEmailForm email="email@email.com" />, { wrapper });
+    render(
+      <VerifiyEmailForm
+        email="email@email.com"
+        code_type="EMAIL_VERIFICATION"
+        onSuccess={() => {}}
+      />,
+      { wrapper },
+    );
 
     await fillValid();
 
@@ -140,7 +169,14 @@ describe("VerifyEmailForm.tsx (unit)", () => {
   });
 
   it("disables submit buttons if form is loading", async () => {
-    render(<VerifiyEmailForm email="email@email.com" />, { wrapper });
+    render(
+      <VerifiyEmailForm
+        email="email@email.com"
+        code_type="EMAIL_VERIFICATION"
+        onSuccess={() => {}}
+      />,
+      { wrapper },
+    );
 
     await fillValid();
 

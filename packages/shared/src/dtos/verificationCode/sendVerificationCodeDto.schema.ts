@@ -1,4 +1,4 @@
-import { number, object, string } from "zod/v4-mini";
+import { number, object } from "zod/v4-mini";
 import { emailSchema } from "../../fieldValidation/user.js";
 import { verificationCodeTypeSchema } from "../../fieldValidation/verificationCode.js";
 
@@ -10,7 +10,7 @@ export const sendVerificationCodeRequestDto = object({
 });
 
 export const sendVerificationCodeResponseDto = object({
-  can_resend_at_timestamp: number,
+  can_resend_at_timestamp: number(),
 });
 
 export type SendVerificationCodeRequestDto = typeof sendVerificationCodeRequestDto._zod.output;

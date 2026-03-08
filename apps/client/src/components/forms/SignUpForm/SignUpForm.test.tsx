@@ -77,7 +77,7 @@ describe("SignUpForm.tsx", () => {
   });
 
   it("should submit successfully if form is valid", async () => {
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     await fillFormWithValidData();
 
@@ -87,7 +87,7 @@ describe("SignUpForm.tsx", () => {
   });
 
   it("should block submission if form is invalid", async () => {
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     await fillFormWithInvalidData();
 
@@ -97,7 +97,7 @@ describe("SignUpForm.tsx", () => {
   });
 
   it("enables form submittion if form is valid", async () => {
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     await fillFormWithValidData();
 
@@ -124,7 +124,7 @@ describe("SignUpForm.tsx", () => {
 
     (signUpApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     const { usernameField } = await fillFormWithValidData();
 
@@ -148,7 +148,7 @@ describe("SignUpForm.tsx", () => {
 
     (signUpApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     const { emailField } = await fillFormWithValidData();
 
@@ -173,7 +173,7 @@ describe("SignUpForm.tsx", () => {
 
     (signUpApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     const { passwordField } = await fillFormWithValidData();
 
@@ -197,7 +197,7 @@ describe("SignUpForm.tsx", () => {
 
     (signUpApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     await fillFormWithValidData();
 
@@ -213,7 +213,7 @@ describe("SignUpForm.tsx", () => {
   it("should handle errors other then axios errors correctly", async () => {
     (signUpApi as Mock).mockRejectedValue(new Error("random error"));
 
-    render(<SignUpForm />, { wrapper: createWrapper() });
+    render(<SignUpForm onSuccess={() => {}} />, { wrapper: createWrapper() });
 
     await fillFormWithValidData();
 

@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import LargeLogo from "../../LargeLogo";
 import { ErrorTraingleIcon } from "../../../svgs";
 import InputGroup from "../../InputGroup";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,11 +8,12 @@ import { useMutation } from "@tanstack/react-query";
 import verifyEmailApi from "../../../api/verifyEmailApi";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
-import { useNavigate } from "react-router-dom";
-import ReCaptchaFormMessage from "../../ReCaptchaFormMessage";
+import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
 
 interface Props {
   email: string;
+  code_type: verificationCodeFieldValidations.VerificationCodeType;
+  onSuccess: () => void;
 }
 
 const serverErrorToFieldMap: Record<string, keyof VerifyEmailFormSchema> = {
@@ -21,9 +21,8 @@ const serverErrorToFieldMap: Record<string, keyof VerifyEmailFormSchema> = {
 };
 
 function VerifiyEmailForm(props: Props) {
-  const navigate = useNavigate();
   const form = useForm<VerifyEmailFormSchema>({
-    defaultValues: { email: props.email, code: "" },
+    defaultValues: { email: props.email, code: "", code_type: props.code_type },
     resolver: zodResolver(verifyEmailFormSchema),
     mode: "all",
   });
@@ -45,7 +44,7 @@ function VerifiyEmailForm(props: Props) {
       }
     },
     onSuccess: () => {
-      navigate("/sign-in");
+      props.onSuccess();
       form.reset();
     },
   });
@@ -60,10 +59,6 @@ function VerifiyEmailForm(props: Props) {
 
   return (
     <form className="flex flex-col gap-10" onSubmit={form.handleSubmit(submit)}>
-      <div className="flex flex-col gap-2">
-        <LargeLogo />
-        <p className="text-sm text-textMuted">Create your free account</p>
-      </div>
       {form.formState.errors.root?.message && (
         <p
           data-testid="rootError"
@@ -72,7 +67,7 @@ function VerifiyEmailForm(props: Props) {
           <ErrorTraingleIcon className="size-4" /> {form.formState.errors.root?.message}
         </p>
       )}
-      <div className="flex flex-col gap-5 border-b pb-5 border-ui-border">
+      <div className="flex flex-col gap-5">
         <InputGroup
           label="Code"
           error={form.formState.errors.code?.message}
@@ -89,7 +84,6 @@ function VerifiyEmailForm(props: Props) {
           Verify email
         </Button>
       </div>
-      <ReCaptchaFormMessage />
     </form>
   );
 }

@@ -52,12 +52,16 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
   });
 
   it("validates verification code", async () => {
-    await verifyEmailUsecase.execute({ code: "123456", email: "email@email.com" });
+    await verifyEmailUsecase.execute({
+      code: "123456",
+      email: "email@email.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
 
     expect(validateVerificationCodeService.execute).toHaveBeenCalledWith(prismaTsxMock, {
       email: "email@email.com",
       code: "123456",
-      code_type: "EMAIL_VERIFICATION" as VerificationCode["type"],
+      code_type: "EMAIL_VERIFICATION",
     });
   });
 
@@ -69,7 +73,11 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
     });
 
     try {
-      await verifyEmailUsecase.execute({ code: "123456", email: "email@email.com" });
+      await verifyEmailUsecase.execute({
+        code: "123456",
+        email: "email@email.com",
+        code_type: "EMAIL_VERIFICATION",
+      });
     } catch (error) {
       expect(rateLimitVerificationCodeService.execute).toHaveBeenCalledWith(null, {
         verificationCode: verificationCodeFixtures.verificationCodeMock,
@@ -85,16 +93,28 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
     });
 
     await expect(
-      verifyEmailUsecase.execute({ code: "123456", email: "email@email.com" }),
+      verifyEmailUsecase.execute({
+        code: "123456",
+        email: "email@email.com",
+        code_type: "EMAIL_VERIFICATION",
+      }),
     ).rejects.toThrow(ValidationException);
 
     await expect(
-      verifyEmailUsecase.execute({ code: "123456", email: "email@email.com" }),
+      verifyEmailUsecase.execute({
+        code: "123456",
+        email: "email@email.com",
+        code_type: "EMAIL_VERIFICATION",
+      }),
     ).rejects.toThrow("Invalid or expired code");
   });
 
   it("verifies email and deletes verificaton code if code is valid", async () => {
-    await verifyEmailUsecase.execute({ code: "123456", email: "email@email.com" });
+    await verifyEmailUsecase.execute({
+      code: "123456",
+      email: "email@email.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
 
     expect(prismaTsxMock.user.update).toHaveBeenCalledWith({
       where: { id: mockUser.id },

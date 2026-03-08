@@ -13,17 +13,6 @@ vi.mock("../../../api/sendEmailVerificationCodeApi", () => ({ default: vi.fn() }
 
 import SendEmailVerificationCodeForm from "./SendVerificationCodeForm";
 
-const navigateMock = vi.fn();
-
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
-
-  return {
-    ...actual,
-    useNavigate: () => navigateMock,
-  };
-});
-
 async function fillValid() {
   const emailField = screen.getByLabelText(/email/i);
   await userEvent.type(emailField, "email@email.com", { delay: 1 });
@@ -37,16 +26,15 @@ async function fillInvalid() {
 
 async function submitForm() {
   const submitBtn = screen.getByRole("button", { name: /send verification code/i });
-
   await userEvent.click(submitBtn);
 }
 
 function makeWrapper() {
   const queryClient = new QueryClient();
 
-  return (props: { children: React.ReactNode }) => (
+  return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>{props.children}</MemoryRouter>
+      <MemoryRouter>{children}</MemoryRouter>
     </QueryClientProvider>
   );
 }
@@ -57,26 +45,25 @@ describe("SendVerificationCodeForm.tsx", () => {
   });
 
   it("prevents user from submitting if form is invalid", async () => {
-    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" onSuccess={() => {}} />, {
       wrapper: makeWrapper(),
     });
 
     await fillInvalid();
 
-    const submitBtn = screen.getByRole("button", { name: "Send verification code" });
+    const submitBtn = screen.getByRole("button", { name: /send verification code/i });
 
     expect(submitBtn).toBeDisabled();
   });
 
-  it("automatically fills email field with the email prop value if passsed", () => {
-    render(
-      <SendEmailVerificationCodeForm email="email@email.com" code_type="EMAIL_VERIFICATION" />,
-      { wrapper: makeWrapper() },
-    );
+  it("initializes email field empty", () => {
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" onSuccess={() => {}} />, {
+      wrapper: makeWrapper(),
+    });
 
     const emailField = screen.getByRole("textbox");
 
-    expect(emailField).toHaveValue("email@email.com");
+    expect(emailField).toHaveValue("");
   });
 
   it("displays error message if a user with that email does not exist", async () => {
@@ -87,11 +74,14 @@ describe("SendVerificationCodeForm.tsx", () => {
       message: errorMessage,
     };
 
-    const axiosError = { ...new AxiosError(), response: { data: serverError } };
+    const axiosError = {
+      ...new AxiosError(),
+      response: { data: serverError },
+    };
 
     (sendEmailVerificationCodeApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" onSuccess={() => {}} />, {
       wrapper: makeWrapper(),
     });
 
@@ -119,11 +109,14 @@ describe("SendVerificationCodeForm.tsx", () => {
       message: errorMessage,
     };
 
-    const axiosError = { ...new AxiosError(), response: { data: serverError } };
+    const axiosError = {
+      ...new AxiosError(),
+      response: { data: serverError },
+    };
 
     (sendEmailVerificationCodeApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" onSuccess={() => {}} />, {
       wrapper: makeWrapper(),
     });
 
@@ -144,11 +137,14 @@ describe("SendVerificationCodeForm.tsx", () => {
       message: errorMessage,
     };
 
-    const axiosError = { ...new AxiosError(), response: { data: serverError } };
+    const axiosError = {
+      ...new AxiosError(),
+      response: { data: serverError },
+    };
 
     (sendEmailVerificationCodeApi as Mock).mockRejectedValue(axiosError);
 
-    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" onSuccess={() => {}} />, {
       wrapper: makeWrapper(),
     });
 
@@ -161,43 +157,35 @@ describe("SendVerificationCodeForm.tsx", () => {
     expect(rootError).toHaveTextContent(errorMessage);
   });
 
-  it("redirects user to /verify-email if the submission was successfull", async () => {
-    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
-      wrapper: makeWrapper(),
-    });
+  it("calls onSuccess when submission is successful", async () => {
+    const onSuccessMock = vi.fn();
 
-    await fillValid();
+    (sendEmailVerificationCodeApi as Mock).mockResolvedValue({});
 
-    await submitForm();
-
-    expect(navigateMock).toHaveBeenCalledWith("/verify-email", {
-      state: { email: "email@email.com" },
-    });
-  });
-
-  it("should handle errors other then axios errors correctly", async () => {
-    (sendEmailVerificationCodeApi as Mock).mockRejectedValue(new Error("random error"));
-
-    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" />, {
-      wrapper: makeWrapper(),
-    });
-
-    await fillValid();
-
-    await submitForm();
-  });
-
-  it("displays description if provided", () => {
     render(
-      <SendEmailVerificationCodeForm
-        code_type="EMAIL_VERIFICATION"
-        description="description provided"
-      />,
-      {
-        wrapper: makeWrapper(),
-      },
+      <SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" onSuccess={onSuccessMock} />,
+      { wrapper: makeWrapper() },
     );
 
-    expect(screen.getByText("description provided")).toBeInTheDocument();
+    await fillValid();
+
+    await submitForm();
+
+    expect(onSuccessMock).toHaveBeenCalledWith({
+      emailUsed: "email@email.com",
+      code_type: "EMAIL_VERIFICATION",
+    });
+  });
+
+  it("handles non-axios errors without crashing", async () => {
+    (sendEmailVerificationCodeApi as Mock).mockRejectedValue(new Error("random error"));
+
+    render(<SendEmailVerificationCodeForm code_type="EMAIL_VERIFICATION" onSuccess={() => {}} />, {
+      wrapper: makeWrapper(),
+    });
+
+    await fillValid();
+
+    await submitForm();
   });
 });

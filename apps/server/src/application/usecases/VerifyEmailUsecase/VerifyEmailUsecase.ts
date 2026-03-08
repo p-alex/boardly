@@ -7,6 +7,7 @@ import validateVerificationCodeService, {
 import rateLimitVerificationCodeService, {
   RateLimitVerificationCodeService,
 } from "../../services/verificationCode/RateLimitVerificationCodeService.js";
+import { VerificationCode } from "../../../../generated/prisma_client/client.js";
 
 export class VerifyEmailUsecase implements IUsecase {
   constructor(
@@ -14,13 +15,13 @@ export class VerifyEmailUsecase implements IUsecase {
     private readonly _rateLimitVerificationCodeService: RateLimitVerificationCodeService,
   ) {}
 
-  execute = async (data: { email: string; code: string }) => {
+  execute = async (data: { email: string; code: string; code_type: VerificationCode["type"] }) => {
     return await prisma.$transaction(async (tsx) => {
       const { isCodeValid, verificationCode, user } =
         await this._validateVerificationCodeService.execute(tsx, {
           email: data.email,
           code: data.code,
-          code_type: "EMAIL_VERIFICATION",
+          code_type: data.code_type,
         });
 
       if (!isCodeValid) {

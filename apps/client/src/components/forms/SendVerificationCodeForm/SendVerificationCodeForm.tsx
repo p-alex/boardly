@@ -1,10 +1,8 @@
 import { useForm } from "react-hook-form";
 import InputGroup from "../../InputGroup";
-import LargeLogo from "../../LargeLogo";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "../../Button/Button";
-import ReCaptchaFormMessage from "../../ReCaptchaFormMessage";
 import {
   sendVerificationCodeFormSchema,
   SendVerificationCodeFormSchema,
@@ -13,13 +11,15 @@ import { useMutation } from "@tanstack/react-query";
 import sendEmailVerificationCodeApi from "../../../api/sendEmailVerificationCodeApi";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
-import { useNavigate } from "react-router-dom";
 import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
 
 interface Props {
   email?: string;
   code_type: verificationCodeFieldValidations.VerificationCodeType;
-  description?: string;
+  onSuccess: (data: {
+    emailUsed: string;
+    code_type: verificationCodeFieldValidations.VerificationCodeType;
+  }) => void;
 }
 
 const serverErrorToFieldMap: Record<string, keyof SendVerificationCodeFormSchema | "root"> = {
@@ -28,8 +28,6 @@ const serverErrorToFieldMap: Record<string, keyof SendVerificationCodeFormSchema
 };
 
 function SendVerificationCodeForm(props: Props) {
-  const navigate = useNavigate();
-
   const form = useForm<SendVerificationCodeFormSchema>({
     defaultValues: { email: props.email ? props.email : "", code_type: props.code_type },
     resolver: zodResolver(sendVerificationCodeFormSchema),
@@ -53,7 +51,7 @@ function SendVerificationCodeForm(props: Props) {
       }
     },
     onSuccess: () => {
-      navigate("/verify-email", { state: { email: form.getValues("email") } });
+      props.onSuccess({ emailUsed: form.getValues("email"), code_type: props.code_type });
       form.reset();
     },
   });
@@ -67,11 +65,7 @@ function SendVerificationCodeForm(props: Props) {
   };
 
   return (
-    <form className="flex flex-col gap-10" onSubmit={form.handleSubmit(submit)}>
-      <div className="flex flex-col gap-2">
-        <LargeLogo />
-        {props?.description && <p className="text-sm text-textMuted">{props.description}</p>}
-      </div>
+    <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(submit)}>
       {form.formState.errors.root?.message && (
         <p
           data-testid="rootError"
@@ -80,7 +74,7 @@ function SendVerificationCodeForm(props: Props) {
           {form.formState.errors.root.message}
         </p>
       )}
-      <div className="flex flex-col gap-5 border-b pb-5 border-ui-border">
+      <div className="flex flex-col gap-5">
         <InputGroup
           label="Email"
           error={form.formState.errors.email?.message}
@@ -97,7 +91,6 @@ function SendVerificationCodeForm(props: Props) {
           Send verification code
         </Button>
       </div>
-      <ReCaptchaFormMessage />
     </form>
   );
 }

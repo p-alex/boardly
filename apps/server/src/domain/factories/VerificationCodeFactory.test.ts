@@ -2,9 +2,10 @@ import { Mock, Mocked, vi } from "vitest";
 import { Clock, CryptoUtil } from "@boardly/shared/utils";
 import { VerificationCodeFactory } from "../factories/VerificationCodeFactory";
 import { VerificationCode } from "../../../generated/prisma_client/client";
+import { verificationCodeConstants } from "@boardly/shared/constants";
 
-const EMAIL_CODE_EXPIRY_MS = 1000 * 60 * 10;
-const EMAIL_CODE_RESEND_DEFAULT_MS = 1000 * 60 * 2;
+const EMAIL_CODE_EXPIRY_MS = verificationCodeConstants.EXPIRES_AFTER_MS;
+const EMAIL_CODE_RESEND_DEFAULT_MS = verificationCodeConstants.CAN_RESEND_AFTER_MS;
 
 describe("VerificationCodeFactory.ts", () => {
   const now = 1000;

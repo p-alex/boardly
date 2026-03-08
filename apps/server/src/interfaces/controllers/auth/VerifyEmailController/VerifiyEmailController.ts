@@ -11,8 +11,8 @@ export class VerifiyEmailController implements IController {
   handle = async (
     httpRequest: HttpRequest<VerifyEmailRequestDto["body"]>,
   ): Promise<ControllerResponse<VerifyEmailResponseDto>> => {
-    const { code, email } = httpRequest.body;
-    await this._verifyEmailUsecase.execute({ code, email });
+    const { code, email, code_type } = httpRequest.body;
+    await this._verifyEmailUsecase.execute({ code, email, code_type });
     return { result: { success: true }, code: 200 };
   };
 }

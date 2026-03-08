@@ -1,16 +1,13 @@
 import { useForm } from "react-hook-form";
 import InputGroup from "../../InputGroup";
-import LargeLogo from "../../LargeLogo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import signUpFormSchema, { SignUpFormSchema } from "./signUpForm.schema";
 import Button from "../../Button/Button";
-import ReCaptchaFormMessage from "../../ReCaptchaFormMessage";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { useMutation } from "@tanstack/react-query";
 import signUpApi from "../../../api/signUpApi";
 import { ErrorTraingleIcon } from "../../../svgs";
-import { useNavigate } from "react-router-dom";
 
 const serverErrorToFieldMap: Record<string, keyof SignUpFormSchema> = {
   "A user with that username already exists.": "username",
@@ -19,9 +16,11 @@ const serverErrorToFieldMap: Record<string, keyof SignUpFormSchema> = {
     "password",
 };
 
-function SignUpForm() {
-  const navigate = useNavigate();
+interface Props {
+  onSuccess: (data: { email: string }) => void;
+}
 
+function SignUpForm(props: Props) {
   const form = useForm<SignUpFormSchema>({ resolver: zodResolver(signUpFormSchema), mode: "all" });
 
   const signUpMutation = useMutation({
@@ -41,7 +40,7 @@ function SignUpForm() {
       }
     },
     onSuccess: () => {
-      navigate("/send-email-verification-code", { state: { email: form.getValues("email") } });
+      props.onSuccess({ email: form.getValues("email") });
       form.reset();
     },
   });
@@ -60,10 +59,6 @@ function SignUpForm() {
 
   return (
     <form className="flex flex-col gap-10" onSubmit={form.handleSubmit(handleSignUp)}>
-      <div className="flex flex-col gap-2">
-        <LargeLogo />
-        <p className="text-sm text-textMuted">Create your free account</p>
-      </div>
       {form.formState.errors.root?.message && (
         <p
           data-testid="rootError"
@@ -72,7 +67,7 @@ function SignUpForm() {
           <ErrorTraingleIcon className="size-4" /> {form.formState.errors.root?.message}
         </p>
       )}
-      <div className="flex flex-col gap-5 border-b pb-5 border-ui-border">
+      <div className="flex flex-col gap-5">
         <InputGroup
           label="Username"
           error={form.formState.errors.username?.message}
@@ -114,11 +109,7 @@ function SignUpForm() {
         >
           Create account
         </Button>
-        <p className="text-sm text-text">
-          Already have an account? <a href="/">Sign in</a>
-        </p>
       </div>
-      <ReCaptchaFormMessage />
     </form>
   );
 }

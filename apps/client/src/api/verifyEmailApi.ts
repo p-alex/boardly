@@ -1,7 +1,14 @@
 import { VerifyEmailRequestDto, VerifyEmailResponseDto } from "@boardly/shared/dtos/auth";
+import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
 import axios, { AxiosResponse } from "axios";
 
-async function verifyEmailApi(data: { code: string; email: string }) {
+export type VerifyEmailApiData = {
+  code: string;
+  email: string;
+  code_type: verificationCodeFieldValidations.VerificationCodeType;
+};
+
+async function verifyEmailApi(data: VerifyEmailApiData) {
   const response = await axios.post<
     any,
     AxiosResponse<VerifyEmailResponseDto>,

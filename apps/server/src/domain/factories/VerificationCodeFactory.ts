@@ -1,6 +1,7 @@
 import { clock, Clock, cryptoUtil, CryptoUtil } from "@boardly/shared/utils";
 import { getVerificationCodeSecret } from "../services/verificationCode/getVerificationCodeSecret.js";
 import { VerificationCode } from "../../../generated/prisma_client/client.js";
+import { verificationCodeConstants } from "@boardly/shared/constants";
 
 export class VerificationCodeFactory {
   private readonly _expiresInMs: number;
@@ -11,8 +12,8 @@ export class VerificationCodeFactory {
     private readonly _getVerificationCodeSecret: typeof getVerificationCodeSecret,
     private readonly _clock: Clock,
   ) {
-    this._expiresInMs = 1000 * 60 * 10; // 10 minutes
-    this._defaultCanResendInMs = 1000 * 60 * 2; // 2 minutes
+    this._expiresInMs = verificationCodeConstants.EXPIRES_AFTER_MS;
+    this._defaultCanResendInMs = verificationCodeConstants.CAN_RESEND_AFTER_MS;
   }
 
   create = (data: {

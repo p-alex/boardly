@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import verifyEmailApi from "./verifyEmailApi";
+import verifyEmailApi, { VerifyEmailApiData } from "./verifyEmailApi";
 import axios, { AxiosResponse } from "axios";
 import type { VerifyEmailResponseDto } from "@boardly/shared/dtos/auth";
 
@@ -13,7 +13,12 @@ describe("verifyEmailApi", () => {
   });
 
   it("calls axios.post with correct URL and data and returns response", async () => {
-    const data = { email: "test@example.com", code: "123456" };
+    const data: VerifyEmailApiData = {
+      email: "test@example.com",
+      code: "123456",
+      code_type: "EMAIL_VERIFICATION",
+    };
+
     const mockResponse: Partial<AxiosResponse<VerifyEmailResponseDto>> = {
       data: { success: true },
       status: 200,
@@ -33,7 +38,11 @@ describe("verifyEmailApi", () => {
   });
 
   it("propagates errors thrown by axios.post", async () => {
-    const data = { email: "test@example.com", code: "123456" };
+    const data: VerifyEmailApiData = {
+      email: "test@example.com",
+      code: "123456",
+      code_type: "EMAIL_VERIFICATION",
+    };
     const error = new Error("Network Error");
     mockedAxiosPost.mockRejectedValue(error);
 
