@@ -8,11 +8,16 @@ import { IService, PrismaTsx } from "../index.js";
 import verificationCodeChecker, {
   VerificationCodeChecker,
 } from "../../../domain/services/verificationCode/VerificationCodeChecker.js";
+import getNewVerificationCodeResendAtDate from "../../../domain/services/verificationCode/getNewVerificationCodeResendAtDate.js";
+import msToMinutes from "../../../utils/getMinutesUntilDate.js";
+import getMinutesUntilDate from "../../../utils/getMinutesUntilDate.js";
 
 export class RefreshVerificationCodeService implements IService {
   constructor(
     private readonly _verificationCodeFactory: VerificationCodeFactory,
     private readonly _verificationCodeChecker: VerificationCodeChecker,
+    private readonly _getNewVerificationCodeResendAtDate: typeof getNewVerificationCodeResendAtDate,
+    private readonly _getMinutesUntilDate: typeof getMinutesUntilDate,
   ) {}
 
   execute = async (
@@ -23,10 +28,15 @@ export class RefreshVerificationCodeService implements IService {
 
     const isLocked = this._verificationCodeChecker.isLocked(data.verificationCode);
     if (isLocked)
-      throw new ValidationException("Sent too many verification codes. Try again later.");
+      throw new ValidationException(
+        `Sent too many verification codes. Try again in ${this._getMinutesUntilDate(data.verificationCode.lock_until!)} minutes.`,
+      );
 
     const canResend = this._verificationCodeChecker.canResend(data.verificationCode);
-    if (!canResend) throw new ValidationException("Can't send code now. Try again later.");
+    if (!canResend)
+      throw new ValidationException(
+        `Can't send code now. Try again in ${this._getMinutesUntilDate(data.verificationCode.can_resend_at)} minutes.`,
+      );
 
     const { rawCode, verificationCode: newVerificationCode } = this._verificationCodeFactory.create(
       {
@@ -42,7 +52,9 @@ export class RefreshVerificationCodeService implements IService {
         expires_at: newVerificationCode.expires_at,
         last_attempt_at: newVerificationCode.last_attempt_at,
         resend_code_count: { increment: 1 },
-        can_resend_at: newVerificationCode.can_resend_at,
+        can_resend_at: this._getNewVerificationCodeResendAtDate({
+          resend_count: data.verificationCode.resend_code_count + 1,
+        }),
       },
       where: { id: data.verificationCode.id },
     });
@@ -54,6 +66,8 @@ export class RefreshVerificationCodeService implements IService {
 const refreshVerificationCodeService = new RefreshVerificationCodeService(
   verificationCodeFactory,
   verificationCodeChecker,
+  getNewVerificationCodeResendAtDate,
+  getMinutesUntilDate,
 );
 
 export default refreshVerificationCodeService;

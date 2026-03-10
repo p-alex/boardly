@@ -13,7 +13,7 @@ export class VerificationCodeFactory {
     private readonly _clock: Clock,
   ) {
     this._expiresInMs = verificationCodeConstants.EXPIRES_AFTER_MS;
-    this._defaultCanResendInMs = verificationCodeConstants.CAN_RESEND_AFTER_MS;
+    this._defaultCanResendInMs = verificationCodeConstants.BASE_CAN_RESEND_AFTER_MS;
   }
 
   create = (data: {

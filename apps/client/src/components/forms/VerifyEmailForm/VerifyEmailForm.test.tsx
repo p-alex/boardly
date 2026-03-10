@@ -1,5 +1,3 @@
-// TODO: WRITE THIS TEST FILE
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { screen, waitFor } from "@testing-library/dom";
 import { render } from "@testing-library/react";

@@ -5,7 +5,7 @@ import { VerificationCode } from "../../../generated/prisma_client/client";
 import { verificationCodeConstants } from "@boardly/shared/constants";
 
 const EMAIL_CODE_EXPIRY_MS = verificationCodeConstants.EXPIRES_AFTER_MS;
-const EMAIL_CODE_RESEND_DEFAULT_MS = verificationCodeConstants.CAN_RESEND_AFTER_MS;
+const EMAIL_CODE_RESEND_DEFAULT_MS = verificationCodeConstants.BASE_CAN_RESEND_AFTER_MS;
 
 describe("VerificationCodeFactory.ts", () => {
   const now = 1000;

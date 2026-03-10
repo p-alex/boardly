@@ -17,6 +17,7 @@ import { RefreshVerificationCodeService } from "./RefreshVerificationCodeService
 import { PrismaTsx } from "../index.js";
 import ValidationException from "../../../exceptions/ValidationException.js";
 import { VerificationCode } from "../../../../generated/prisma_client/client.js";
+import getNewVerificationCodeResendAtDate from "../../../domain/services/verificationCode/getNewVerificationCodeResendAtDate.js";
 
 describe("RefreshVerificationCodeService.ts (unit)", () => {
   let refreshVerificationCodeService: RefreshVerificationCodeService;
@@ -25,6 +26,8 @@ describe("RefreshVerificationCodeService.ts (unit)", () => {
 
   let verificationCodeFactory: Mocked<VerificationCodeFactory>;
   let verificationCodeChecker: Mocked<VerificationCodeChecker>;
+  let getNewVerificationCodeResendAtDate: Mock;
+  let getMinutesUntilDate: Mock;
 
   beforeEach(() => {
     verificationCodeFactory = {
@@ -36,9 +39,15 @@ describe("RefreshVerificationCodeService.ts (unit)", () => {
       canResend: vi.fn(),
     } as unknown as Mocked<VerificationCodeChecker>;
 
+    getNewVerificationCodeResendAtDate = vi.fn();
+
+    getMinutesUntilDate = vi.fn().mockReturnValue(5);
+
     refreshVerificationCodeService = new RefreshVerificationCodeService(
       verificationCodeFactory,
       verificationCodeChecker,
+      getNewVerificationCodeResendAtDate,
+      getMinutesUntilDate,
     );
   });
 
@@ -56,6 +65,13 @@ describe("RefreshVerificationCodeService.ts (unit)", () => {
       }),
     ).rejects.toThrow(ValidationException);
 
+    await expect(
+      refreshVerificationCodeService.execute(null, {
+        user_id: "user_id",
+        verificationCode: verificationCodeFixtures.verificationCodeMock,
+      }),
+    ).rejects.toThrow(`Sent too many verification codes. Try again in ${5} minutes.`);
+
     expect(verificationCodeChecker.isLocked).toHaveBeenCalledWith(
       verificationCodeFixtures.verificationCodeMock,
     );
@@ -71,6 +87,13 @@ describe("RefreshVerificationCodeService.ts (unit)", () => {
         verificationCode: verificationCodeFixtures.verificationCodeMock,
       }),
     ).rejects.toThrow(ValidationException);
+
+    await expect(
+      refreshVerificationCodeService.execute(null, {
+        user_id: "user_id",
+        verificationCode: verificationCodeFixtures.verificationCodeMock,
+      }),
+    ).rejects.toThrow(`Can't send code now. Try again in ${5} minutes.`);
 
     expect(verificationCodeChecker.canResend).toHaveBeenCalledWith(
       verificationCodeFixtures.verificationCodeMock,
@@ -100,6 +123,9 @@ describe("RefreshVerificationCodeService.ts (unit)", () => {
   });
 
   it("updates the old verification code in the database", async () => {
+    const newResendDate = new Date(1000);
+    getNewVerificationCodeResendAtDate.mockReturnValue(newResendDate);
+
     verificationCodeChecker.isLocked.mockReturnValue(false);
     verificationCodeChecker.canResend.mockReturnValue(true);
 
@@ -113,6 +139,8 @@ describe("RefreshVerificationCodeService.ts (unit)", () => {
       verificationCode: verificationCodeFixtures.verificationCodeMock,
     });
 
+    expect(getNewVerificationCodeResendAtDate).toHaveBeenCalledWith({ resend_count: 1 });
+
     expect(prisma.verificationCode.update).toHaveBeenCalledWith({
       data: {
         attempts: verificationCodeFixtures.verificationCodeMock.attempts,
@@ -120,7 +148,7 @@ describe("RefreshVerificationCodeService.ts (unit)", () => {
         expires_at: verificationCodeFixtures.verificationCodeMock.expires_at,
         last_attempt_at: verificationCodeFixtures.verificationCodeMock.last_attempt_at,
         resend_code_count: { increment: 1 },
-        can_resend_at: verificationCodeFixtures.verificationCodeMock.can_resend_at,
+        can_resend_at: newResendDate,
       } as Partial<VerificationCode & { resend_code_count: { increment: number } }>,
       where: { id: verificationCodeFixtures.verificationCodeMock.id },
     });
