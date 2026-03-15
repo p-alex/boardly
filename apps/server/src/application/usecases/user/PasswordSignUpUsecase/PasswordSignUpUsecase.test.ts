@@ -1,17 +1,17 @@
 import { vi, Mocked, Mock } from "vitest";
-import { UserCreatorService } from "../../services/user/UserCreatorService";
-import { UserEmailFinderService } from "../../services/user/UserEmailFinderService";
-import { UserEmailRotationService } from "../../services/user/UserEmailRotationService";
-import { SignUpUsecase } from "../SignUpUsecase/SignUpUsecase";
-import { PrismaTsx } from "../../services/index.js";
-import { PrismaClient } from "../../../../generated/prisma_client/client.js";
-import { mockUser } from "../../../__fixtures__/user/mockUser.js";
-import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
-import { PwnedPasswordCheckerService } from "../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
-import ValidationException from "../../../exceptions/ValidationException.js";
+import { UserCreatorService } from "../../../services/user/UserCreatorService.js";
+import { UserEmailFinderService } from "../../../services/user/UserEmailFinderService.js";
+import { UserEmailRotationService } from "../../../services/user/UserEmailRotationService.js";
+import { PasswordSignUpUsecase } from "./PasswordSignUpUsecase.js";
+import { PrismaTsx } from "../../../services/index.js";
+import { PrismaClient } from "../../../../../generated/prisma_client/client.js";
+import { mockUser } from "../../../../__fixtures__/user/mockUser.js";
+import AlreadyExistsException from "../../../../exceptions/AlreadyExistsException.js";
+import { PwnedPasswordCheckerService } from "../../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
+import ValidationException from "../../../../exceptions/ValidationException.js";
 
 describe("SignUpUsecase.ts (unit)", () => {
-  let signUpUsecase: SignUpUsecase;
+  let passwordSignUpUsecase: PasswordSignUpUsecase;
 
   let userCreatorServiceMock: Mocked<UserCreatorService>;
   let userEmailFinderServiceMock: UserEmailFinderService;
@@ -49,7 +49,7 @@ describe("SignUpUsecase.ts (unit)", () => {
       execute: vi.fn(),
     } as unknown as Mocked<PwnedPasswordCheckerService>;
 
-    signUpUsecase = new SignUpUsecase(
+    passwordSignUpUsecase = new PasswordSignUpUsecase(
       userCreatorServiceMock,
       userEmailFinderServiceMock,
       userEmailRotationServiceMock,
@@ -62,7 +62,7 @@ describe("SignUpUsecase.ts (unit)", () => {
     (prismaTsxMock.user.findUnique as Mock).mockResolvedValue(mockUser);
 
     try {
-      await signUpUsecase.execute({
+      await passwordSignUpUsecase.execute({
         email: "email@email.com",
         password: "password",
         username: "username",
@@ -84,7 +84,7 @@ describe("SignUpUsecase.ts (unit)", () => {
     });
 
     await expect(
-      signUpUsecase.execute({
+      passwordSignUpUsecase.execute({
         email: "email@email.com",
         password: "password",
         username: "username",
@@ -101,7 +101,7 @@ describe("SignUpUsecase.ts (unit)", () => {
     });
 
     try {
-      await signUpUsecase.execute({
+      await passwordSignUpUsecase.execute({
         email: "email@email.com",
         password: "password",
         username: "username",
@@ -120,7 +120,7 @@ describe("SignUpUsecase.ts (unit)", () => {
     pwnedPasswordCheckerServiceMock.execute.mockResolvedValue(true);
 
     await expect(
-      signUpUsecase.execute({
+      passwordSignUpUsecase.execute({
         email: "email@email.com",
         password: "password",
         username: "username",
@@ -135,14 +135,14 @@ describe("SignUpUsecase.ts (unit)", () => {
       username: "username",
     };
 
-    await signUpUsecase.execute(data);
+    await passwordSignUpUsecase.execute(data);
 
     expect(userCreatorServiceMock.execute).toHaveBeenCalledWith(prismaTsxMock, data);
     expect(userCreatorServiceMock.execute).toHaveBeenCalledTimes(1);
   });
 
   it("returns null", async () => {
-    const result = await signUpUsecase.execute({
+    const result = await passwordSignUpUsecase.execute({
       email: "email@email.com",
       password: "password",
       username: "username",

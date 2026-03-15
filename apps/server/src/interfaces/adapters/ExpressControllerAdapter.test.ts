@@ -1,8 +1,9 @@
 import { Mocked, vi } from "vitest";
 import { ExpressControllerAdapter } from "./ExpressControllerAdapter";
-import { ControllerResponse, IController } from "../controllers/auth/EmailSignUpController";
+import { ControllerResponse, IController } from "../controllers/auth/PasswordSignUpController";
 import { mockReq } from "../../__fixtures__/request/mockReq";
 import { mockRes } from "../../__fixtures__/response/mockRes";
+import { cookieFixture } from "../../__fixtures__";
 
 describe("ExpressControllerAdapter.ts (unit)", () => {
   let expressControllerAdapter: ExpressControllerAdapter;
@@ -38,5 +39,30 @@ describe("ExpressControllerAdapter.ts (unit)", () => {
 
     expect(mockRes.status).toHaveBeenCalled();
     expect(mockRes.json).toHaveBeenCalled();
+  });
+
+  it("applies cookies if controller returns them", async () => {
+    mockController = {
+      handle: vi.fn().mockResolvedValue({
+        code: 200,
+        result: { test: "test" },
+        cookies: [cookieFixture],
+      } as ControllerResponse<{
+        test: "test";
+      }>),
+    };
+
+    const handler = expressControllerAdapter.adapt(mockController);
+
+    await handler(mockReq, mockRes);
+
+    expect(mockRes.cookie).toHaveBeenCalledWith(cookieFixture.name, cookieFixture.value, {
+      domain: cookieFixture.domain,
+      maxAge: cookieFixture.maxAgeMS,
+      httpOnly: cookieFixture.isHttpOnly,
+      path: cookieFixture.path,
+      secure: cookieFixture.isSecure,
+      sameSite: cookieFixture.sameSite,
+    });
   });
 });

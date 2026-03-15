@@ -1,13 +1,13 @@
-import { prisma } from "../../../prisma.js";
-import ValidationException from "../../../exceptions/ValidationException.js";
-import { IUsecase } from "../index.js";
+import { prisma } from "../../../../prisma.js";
+import ValidationException from "../../../../exceptions/ValidationException.js";
+import { IUsecase } from "../../index.js";
 import validateVerificationCodeService, {
   ValidateVerificationCodeService,
-} from "../../services/verificationCode/ValidateVerificationCodeService.js";
+} from "../../../services/verificationCode/ValidateVerificationCodeService.js";
 import rateLimitVerificationCodeService, {
   RateLimitVerificationCodeService,
-} from "../../services/verificationCode/RateLimitVerificationCodeService.js";
-import { VerificationCode } from "../../../../generated/prisma_client/client.js";
+} from "../../../services/verificationCode/RateLimitVerificationCodeService.js";
+import { VerificationCode } from "../../../../../generated/prisma_client/client.js";
 
 export class VerifyEmailUsecase implements IUsecase {
   constructor(

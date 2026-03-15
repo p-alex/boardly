@@ -4,6 +4,7 @@ export type PasswordPepperVersion = "V1" | "V2";
 
 export interface IEnv {
   NODE_ENV: "development" | "production";
+  SERVER_DOMAIN_NAME: string;
   DATABASE_URL: string;
   CLIENT_BASE_URL: string;
   ENCRYPTION_SECRETS: {
@@ -20,12 +21,16 @@ export interface IEnv {
     VERIFICATION_CODES: {
       EMAIL_VERIFICATION: string;
     };
+    SESSION_TOKEN: string;
   };
   PEPPERS: {
     PASSWORD: Record<PasswordPepperVersion, string> & {
       VERSIONS: PasswordPepperVersion[];
       ACTIVE_VERSION: PasswordPepperVersion;
     };
+  };
+  JWT_SECRETS: {
+    ACCESS_TOKEN: string;
   };
   EMAIL_API: {
     USER: string;
@@ -36,6 +41,7 @@ export interface IEnv {
 
 export const env: IEnv = {
   NODE_ENV: process.env.NODE_ENV! as "development" | "production",
+  SERVER_DOMAIN_NAME: process.env.SERVER_DOMAIN_NAME!,
   CLIENT_BASE_URL: process.env.CLIENT_BASE_URL!,
   DATABASE_URL: process.env.DATABASE_URL!,
   ENCRYPTION_SECRETS: {
@@ -57,6 +63,7 @@ export const env: IEnv = {
     VERIFICATION_CODES: {
       EMAIL_VERIFICATION: process.env.EMAIL_VERIFICATION_CODE_HASH_SECRET!,
     },
+    SESSION_TOKEN: process.env.AUTH_SESSION_HASH_SECRET!,
   },
   PEPPERS: {
     PASSWORD: {
@@ -65,6 +72,9 @@ export const env: IEnv = {
       VERSIONS: ["V1", "V2"],
       ACTIVE_VERSION: process.env.ACTIVE_PASSWORD_PEPPER_VERSION! as PasswordPepperVersion,
     },
+  },
+  JWT_SECRETS: {
+    ACCESS_TOKEN: process.env.ACCESS_TOKEN_JWT_SECRET!,
   },
   EMAIL_API: {
     USER: process.env.EMAIL_API_USER!,

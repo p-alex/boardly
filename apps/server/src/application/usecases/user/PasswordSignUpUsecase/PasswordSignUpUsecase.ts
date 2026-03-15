@@ -1,19 +1,21 @@
-import { PrismaClient } from "../../../../generated/prisma_client/client.js";
-import AlreadyExistsException from "../../../exceptions/AlreadyExistsException.js";
-import ValidationException from "../../../exceptions/ValidationException.js";
-import { prisma } from "../../../prisma.js";
+import { PrismaClient } from "../../../../../generated/prisma_client/client.js";
+import AlreadyExistsException from "../../../../exceptions/AlreadyExistsException.js";
+import ValidationException from "../../../../exceptions/ValidationException.js";
+import { prisma } from "../../../../prisma.js";
 import pwnedPasswordCheckerService, {
   PwnedPasswordCheckerService,
-} from "../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
-import userCreatorService, { UserCreatorService } from "../../services/user/UserCreatorService.js";
+} from "../../../services/auth/PwnedPasswordCheckerService/PwnedPasswordCheckerService.js";
+import userCreatorService, {
+  UserCreatorService,
+} from "../../../services/user/UserCreatorService.js";
 import userEmailFinderService, {
   UserEmailFinderService,
-} from "../../services/user/UserEmailFinderService.js";
+} from "../../../services/user/UserEmailFinderService.js";
 import userEmailRotationService, {
   UserEmailRotationService,
-} from "../../services/user/UserEmailRotationService.js";
+} from "../../../services/user/UserEmailRotationService.js";
 
-export class SignUpUsecase {
+export class PasswordSignUpUsecase {
   constructor(
     private readonly _userCreatorService: UserCreatorService,
     private readonly _userEmailFinderService: UserEmailFinderService,
@@ -59,7 +61,7 @@ export class SignUpUsecase {
   };
 }
 
-const signUpUsecase = new SignUpUsecase(
+const passwordSignUpUsecase = new PasswordSignUpUsecase(
   userCreatorService,
   userEmailFinderService,
   userEmailRotationService,
@@ -67,4 +69,4 @@ const signUpUsecase = new SignUpUsecase(
   prisma,
 );
 
-export default signUpUsecase;
+export default passwordSignUpUsecase;

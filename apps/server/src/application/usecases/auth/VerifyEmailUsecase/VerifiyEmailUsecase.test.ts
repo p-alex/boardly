@@ -1,11 +1,11 @@
 import { Mocked, vi } from "vitest";
-import { ValidateVerificationCodeService } from "../../services/verificationCode/ValidateVerificationCodeService";
+import { ValidateVerificationCodeService } from "../../../services/verificationCode/ValidateVerificationCodeService";
 import { VerifyEmailUsecase } from "./VerifyEmailUsecase";
-import { RateLimitVerificationCodeService } from "../../services/verificationCode/RateLimitVerificationCodeService";
-import { verificationCodeFixtures } from "../../../__fixtures__/index";
-import { mockUser } from "../../../__fixtures__/user";
-import ValidationException from "../../../exceptions/ValidationException";
-import { VerificationCode } from "../../../../generated/prisma_client/client";
+import { RateLimitVerificationCodeService } from "../../../services/verificationCode/RateLimitVerificationCodeService";
+import { verificationCodeFixtures } from "../../../../__fixtures__/index";
+import { mockUser } from "../../../../__fixtures__/user";
+import ValidationException from "../../../../exceptions/ValidationException";
+import { VerificationCode } from "../../../../../generated/prisma_client/client";
 
 describe("VerifiyEmailUsecase.ts (unit)", () => {
   let verifyEmailUsecase: VerifyEmailUsecase;
@@ -35,7 +35,7 @@ describe("VerifiyEmailUsecase.ts (unit)", () => {
       execute: vi.fn(),
     } as unknown as Mocked<RateLimitVerificationCodeService>;
 
-    vi.doMock("../../../prisma.js", () => ({
+    vi.doMock("../../../../prisma.js", () => ({
       prisma: { $transaction: vi.fn((cb) => cb(prismaTsxMock)) },
     }));
 

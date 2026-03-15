@@ -7,6 +7,7 @@ export type HttpRequest<TBody = any, TParams = any, TQuery = any> = {
   client_ip: string;
   method: string;
   url: string;
+  cookies: Record<string, string>;
 };
 
 export function getHttpRequest(req: Request): HttpRequest {
@@ -17,5 +18,6 @@ export function getHttpRequest(req: Request): HttpRequest {
     client_ip: req.ip || req.socket.remoteAddress || "",
     method: req.method,
     url: req.url,
+    cookies: req.cookies,
   };
 }

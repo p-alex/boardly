@@ -1,23 +1,23 @@
-import { IUsecase } from "../index.js";
-import { prisma } from "../../../prisma.js";
+import { IUsecase } from "../../index.js";
+import { prisma } from "../../../../prisma.js";
 import createVerificationCodeService, {
   CreateVerificationCodeService,
-} from "../../services/verificationCode/CreateVerificationCodeService.js";
-import { PrismaClient, VerificationCode } from "../../../../generated/prisma_client/client.js";
+} from "../../../services/verificationCode/CreateVerificationCodeService.js";
+import { PrismaClient, VerificationCode } from "../../../../../generated/prisma_client/client.js";
 import userEmailFinderService, {
   UserEmailFinderService,
-} from "../../services/user/UserEmailFinderService.js";
+} from "../../../services/user/UserEmailFinderService.js";
 import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";
 import verificationCodeMapper, {
   VerificationCodeTypeMapper,
-} from "../../../domain/mappers/VerificationCodeMapper.js";
+} from "../../../../domain/mappers/VerificationCodeMapper.js";
 import refreshVerificationCodeService, {
   RefreshVerificationCodeService,
-} from "../../services/verificationCode/RefreshVerificationCodeService.js";
+} from "../../../services/verificationCode/RefreshVerificationCodeService.js";
 import sendVerificationCodeEmailService, {
   SendVerificationCodeEmailService,
-} from "../../services/verificationCode/SendVerificationCodeEmailService.js";
-import shouldSendVerificationCodeBasedOnType from "../../../domain/services/verificationCode/shouldSendVerificationCodeBasedOnType.js";
+} from "../../../services/verificationCode/SendVerificationCodeEmailService.js";
+import shouldSendVerificationCodeBasedOnType from "../../../../domain/services/verificationCode/shouldSendVerificationCodeBasedOnType.js";
 
 export class SendVerificationCodeUsecase implements IUsecase {
   constructor(

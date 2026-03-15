@@ -12,6 +12,18 @@ import {
   verifyEmailResponseDtoSchema,
 } from "./verifyEmailDto.schema.js";
 
+import {
+  PasswordSignInDtoRequestSchema,
+  PasswordSignInDtoResponseSchema,
+  passwordSignInDtoRequestSchema,
+  passwordSignInDtoResponseSchema,
+} from "./passwordSignInDto.schema.js";
+
+import {
+  RefreshSessionResponseDto,
+  refreshSessionResponseDto,
+} from "./refreshSessionDto.schema.js";
+
 export {
   signUpRequestDtoSchema,
   SignUpRequestDtoSchema,
@@ -21,4 +33,10 @@ export {
   VerifyEmailResponseDto,
   verifyEmailRequestDtoSchema,
   verifyEmailResponseDtoSchema,
+  PasswordSignInDtoRequestSchema,
+  PasswordSignInDtoResponseSchema,
+  passwordSignInDtoRequestSchema,
+  passwordSignInDtoResponseSchema,
+  RefreshSessionResponseDto,
+  refreshSessionResponseDto,
 };

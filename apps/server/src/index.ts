@@ -2,10 +2,13 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import router from "./interfaces/routes/index.js";
+import { env } from "./config.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
-app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(cookieParser());
+app.use(cors({ origin: [env.CLIENT_BASE_URL], credentials: true }));
 app.use(helmet());
 app.use(express.json());
 

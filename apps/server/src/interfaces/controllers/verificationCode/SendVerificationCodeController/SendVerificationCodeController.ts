@@ -1,9 +1,9 @@
 import { SendVerificationCodeResponseDto } from "@boardly/shared/dtos/verificationCode";
 import sendEmailVerificationCodeUsecase, {
   SendVerificationCodeUsecase,
-} from "../../../../application/usecases/SendVerificationCodeUsecase/SendVerificationCodeUsecase.js";
+} from "../../../../application/usecases/auth/SendVerificationCodeUsecase/SendVerificationCodeUsecase.js";
 import { HttpRequest } from "../../../adapters/index.js";
-import { ControllerResponse, IController } from "../../auth/EmailSignUpController/index.js";
+import { ControllerResponse, IController } from "../../auth/PasswordSignUpController/index.js";
 import { VerificationDtos } from "@boardly/shared/dtos/";
 
 export class SendVerificationCodeController implements IController {

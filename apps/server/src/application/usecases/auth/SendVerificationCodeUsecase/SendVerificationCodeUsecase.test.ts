@@ -1,14 +1,14 @@
 import { Mock, Mocked, vi } from "vitest";
 
-import { PrismaClient } from "../../../../generated/prisma_client/client";
+import { PrismaClient } from "../../../../../generated/prisma_client/client";
 import { SendVerificationCodeUsecase } from "./SendVerificationCodeUsecase";
-import { UserEmailFinderService } from "../../services/user/UserEmailFinderService";
-import { CreateVerificationCodeService } from "../../services/verificationCode/CreateVerificationCodeService";
-import { VerificationCodeTypeMapper } from "../../../domain/mappers/VerificationCodeMapper";
-import { RefreshVerificationCodeService } from "../../services/verificationCode/RefreshVerificationCodeService";
-import { SendVerificationCodeEmailService } from "../../services/verificationCode/SendVerificationCodeEmailService";
-import { PrismaTsx } from "../../services";
-import { userFixtures, verificationCodeFixtures } from "../../../__fixtures__";
+import { UserEmailFinderService } from "../../../services/user/UserEmailFinderService";
+import { CreateVerificationCodeService } from "../../../services/verificationCode/CreateVerificationCodeService";
+import { VerificationCodeTypeMapper } from "../../../../domain/mappers/VerificationCodeMapper";
+import { RefreshVerificationCodeService } from "../../../services/verificationCode/RefreshVerificationCodeService";
+import { SendVerificationCodeEmailService } from "../../../services/verificationCode/SendVerificationCodeEmailService";
+import { PrismaTsx } from "../../../services";
+import { userFixtures, verificationCodeFixtures } from "../../../../__fixtures__";
 
 describe("SendVerificationCodeUsecase.ts (unit)", () => {
   let prismaTsxMock: Mocked<PrismaTsx>;

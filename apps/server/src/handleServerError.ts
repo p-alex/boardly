@@ -3,6 +3,8 @@ import ValidationException from "./exceptions/ValidationException.js";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import AlreadyExistsException from "./exceptions/AlreadyExistsException.js";
 import TooManyRequestsException from "./exceptions/TooManyRequestsException.js";
+import LockException from "./exceptions/LockException.js";
+import ForbiddenException from "./exceptions/ForbiddenException.js";
 
 function handleServerError(error: any, res: Response) {
   let errorResponse: ServerErrorResponseDto = {
@@ -36,6 +38,20 @@ function handleServerError(error: any, res: Response) {
       res.setHeader(key, value);
     }
 
+    res.status(errorResponse.status);
+    return res.json(errorResponse);
+  }
+
+  if (error instanceof LockException) {
+    errorResponse.status = 423;
+    errorResponse.message = error.message;
+    res.status(errorResponse.status);
+    return res.json(errorResponse);
+  }
+
+  if (error instanceof ForbiddenException) {
+    errorResponse.status = 403;
+    errorResponse.message = error.message;
     res.status(errorResponse.status);
     return res.json(errorResponse);
   }

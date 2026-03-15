@@ -6,4 +6,5 @@ export const mockRes = {
   json: vi.fn(),
   setHeader: vi.fn(),
   redirect: vi.fn(),
+  cookie: vi.fn(),
 } as unknown as Response;

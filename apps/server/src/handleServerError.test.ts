@@ -4,6 +4,8 @@ import handleServerError from "./handleServerError";
 import ValidationException from "./exceptions/ValidationException";
 import AlreadyExistsException from "./exceptions/AlreadyExistsException";
 import TooManyRequestsException from "./exceptions/TooManyRequestsException";
+import ForbiddenException from "./exceptions/ForbiddenException";
+import LockException from "./exceptions/LockException";
 
 describe("handleServerError.ts (unit)", () => {
   it("should respond correct status code and message for unknown errors", () => {
@@ -33,6 +35,26 @@ describe("handleServerError.ts (unit)", () => {
     expect(mockRes.json).toHaveBeenCalledWith({
       message: "already exists exception",
       status: 409,
+    } as ServerErrorResponseDto);
+  });
+
+  it("should respond with the correct status code and message for LockException", () => {
+    handleServerError(new LockException("lock"), mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(423);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      message: "lock",
+      status: 423,
+    } as ServerErrorResponseDto);
+  });
+
+  it("should respond with the correct status code and message for ForbiddenException", () => {
+    handleServerError(new ForbiddenException("forbidden"), mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(403);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      message: "forbidden",
+      status: 403,
     } as ServerErrorResponseDto);
   });
 

@@ -8,7 +8,7 @@ export const mockUser: User = {
   updated_at: new Date(2025, 0, 1, 0, 0),
   email_encryption_secret_version: "V1",
   email_hash_secret_version: "V1",
-  email_verified: false,
+  email_verified: true,
   encrypted_email: "encrypted_email",
   hard_lock_until: null,
 };

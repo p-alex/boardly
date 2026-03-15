@@ -4,6 +4,6 @@ export const verificationCodeSchema = string().check(
   regex(/^[0-9]{6}$/g, { error: "Code must contain only numbers and be 6 characters long" }),
 );
 
-export const verificationCodeTypeSchema = _enum(["EMAIL_VERIFICATION"]);
+export const verificationCodeTypeSchema = _enum(["EMAIL_VERIFICATION"], "Invalid code type");
 
 export type VerificationCodeType = typeof verificationCodeTypeSchema._zod.output;

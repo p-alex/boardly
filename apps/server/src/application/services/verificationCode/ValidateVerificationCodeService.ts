@@ -5,7 +5,6 @@ import userLockChecker, {
 import verificationCodeChecker, {
   VerificationCodeChecker,
 } from "../../../domain/services/verificationCode/VerificationCodeChecker.js";
-import TooManyRequestsException from "../../../exceptions/TooManyRequestsException.js";
 import ValidationException from "../../../exceptions/ValidationException.js";
 import { prisma } from "../../../prisma.js";
 import { IService, PrismaTsx } from "../index.js";

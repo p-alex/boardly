@@ -1,9 +1,9 @@
 import { VerifyEmailRequestDto, VerifyEmailResponseDto } from "@boardly/shared/dtos/auth";
 import verifyEmailUsecase, {
   VerifyEmailUsecase,
-} from "../../../../application/usecases/VerifyEmailUsecase/VerifyEmailUsecase.js";
+} from "../../../../application/usecases/auth/VerifyEmailUsecase/VerifyEmailUsecase.js";
 import { HttpRequest } from "../../../adapters/index.js";
-import { ControllerResponse, IController } from "../EmailSignUpController/index.js";
+import { ControllerResponse, IController } from "../PasswordSignUpController/index.js";
 
 export class VerifiyEmailController implements IController {
   constructor(private readonly _verifyEmailUsecase: VerifyEmailUsecase) {}

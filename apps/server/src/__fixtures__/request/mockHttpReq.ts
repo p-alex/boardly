@@ -7,4 +7,5 @@ export const mockHttpRequest: HttpRequest = {
   params: {},
   query: {},
   url: "/url",
+  cookies: {},
 };
