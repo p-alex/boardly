@@ -6,6 +6,7 @@ import AlreadyExistsException from "./exceptions/AlreadyExistsException";
 import TooManyRequestsException from "./exceptions/TooManyRequestsException";
 import ForbiddenException from "./exceptions/ForbiddenException";
 import LockException from "./exceptions/LockException";
+import UnauthorizedException from "./exceptions/UnauthorizedException";
 
 describe("handleServerError.ts (unit)", () => {
   it("should respond correct status code and message for unknown errors", () => {
@@ -25,6 +26,16 @@ describe("handleServerError.ts (unit)", () => {
     expect(mockRes.json).toHaveBeenCalledWith({
       message: "validation exception",
       status: 400,
+    } as ServerErrorResponseDto);
+  });
+
+  it("should respond with the correct status code and message for ValidationException", () => {
+    handleServerError(new UnauthorizedException("unauthorized"), mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      message: "unauthorized",
+      status: 401,
     } as ServerErrorResponseDto);
   });
 

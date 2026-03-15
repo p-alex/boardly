@@ -8,4 +8,6 @@ export const mockHttpRequest: HttpRequest = {
   query: {},
   url: "/url",
   cookies: {},
+  accessToken: "Bearer accessToken",
+  auth_user_id: "auth_user_id",
 };

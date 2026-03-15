@@ -10,4 +10,5 @@ export const mockReq = {
   body: {},
   params: {},
   query: {},
+  headers: {} as Request["headers"],
 } as unknown as Request;

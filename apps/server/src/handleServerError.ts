@@ -5,6 +5,7 @@ import AlreadyExistsException from "./exceptions/AlreadyExistsException.js";
 import TooManyRequestsException from "./exceptions/TooManyRequestsException.js";
 import LockException from "./exceptions/LockException.js";
 import ForbiddenException from "./exceptions/ForbiddenException.js";
+import UnauthorizedException from "./exceptions/UnauthorizedException.js";
 
 function handleServerError(error: any, res: Response) {
   let errorResponse: ServerErrorResponseDto = {
@@ -21,6 +22,13 @@ function handleServerError(error: any, res: Response) {
 
   if (error instanceof AlreadyExistsException) {
     errorResponse.status = 409;
+    errorResponse.message = error.message;
+    res.status(errorResponse.status);
+    return res.json(errorResponse);
+  }
+
+  if (error instanceof UnauthorizedException) {
+    errorResponse.status = 401;
     errorResponse.message = error.message;
     res.status(errorResponse.status);
     return res.json(errorResponse);

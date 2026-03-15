@@ -7,6 +7,7 @@ import { cookieFixture } from "./cookieFixture.js";
 import { authSessionFixture } from "./authSessionFixture.js";
 
 import { refreshTokenFixture } from "./refreshTokenFixture.js";
+import { accessTokenPayloadFixture } from "./accessTokenFixture.js";
 
 export {
   verificationCodeFixtures,
@@ -17,4 +18,5 @@ export {
   cookieFixture,
   authSessionFixture,
   refreshTokenFixture,
+  accessTokenPayloadFixture,
 };
