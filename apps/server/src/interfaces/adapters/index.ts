@@ -19,18 +19,6 @@ export type HttpRequest<TBody = any, TParams = any, TQuery = any> = {
 };
 
 export function getHttpRequest(req: Request): HttpRequest {
-  console.log({
-    body: req.body,
-    params: req.params,
-    query: req.query,
-    client_ip: req.ip || req.socket.remoteAddress || "",
-    method: req.method,
-    url: req.url,
-    cookies: req.cookies,
-    accessToken: extractAccessTokenFromRequest(req),
-    authenticatedSession: extractAuthenticatedSessionFromRequest(req),
-    auth_user_id: null,
-  });
   return {
     body: req.body,
     params: req.params,
