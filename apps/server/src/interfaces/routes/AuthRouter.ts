@@ -14,6 +14,8 @@ import sendverificationCodeController from "../controllers/verificationCode/Send
 import verifiyEmailController from "../controllers/auth/VerifyEmailController/VerifiyEmailController.js";
 import passwordSignInController from "../controllers/auth/PasswordSignInController/PasswordSignInController.js";
 import refreshSessionController from "../controllers/auth/RefreshSessionController/RefreshSessionController.js";
+import { authShield } from "../../middleware/AuthShield/AuthShield.js";
+import logoutController from "../controllers/auth/LogoutController/LogoutController.js";
 
 const authRouter = Router();
 
@@ -53,6 +55,13 @@ authRouter.get(
   "/refresh-session",
   expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 })),
   expressControllerAdapter.adapt(refreshSessionController),
+);
+
+authRouter.post(
+  "/logout",
+  expressMiddlewareAdapter.adapt(rateLimiter.setup({ maxRequests: 5, windowMs: 1000 })),
+  expressMiddlewareAdapter.adapt(authShield.setup()),
+  expressControllerAdapter.adapt(logoutController),
 );
 
 export default authRouter;
