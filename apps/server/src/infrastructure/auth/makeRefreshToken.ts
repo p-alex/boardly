@@ -1,9 +1,7 @@
 import crypto from "node:crypto";
 
-function makeRefreshToken(providedSessionId?: string) {
-  const sessionId = providedSessionId ?? crypto.randomUUID();
-  const token = crypto.randomBytes(64).toString("hex");
-  return { refreshToken: `${sessionId}.${token}`, sessionId, token };
+function makeRefreshToken(): string {
+  return crypto.randomBytes(64).toString("hex");
 }
 
 export default makeRefreshToken;

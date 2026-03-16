@@ -14,12 +14,12 @@ export class AuthSessionFactory {
     this._expiresAt = SESSION_EXPIRES_AT;
   }
 
-  create = (data: { id: string; user_id: User["id"]; token: string }): AuthSession => {
+  create = (data: { user_id: User["id"]; refreshToken: string }): AuthSession => {
     const now = this._clock.now();
 
     return {
-      id: data.id,
-      token_hash: this._cryptoUtil.hmacSHA256(data.token, env.HASH_SECRETS.SESSION_TOKEN),
+      id: this._cryptoUtil.randomUUID(),
+      token_hash: this._cryptoUtil.hmacSHA256(data.refreshToken, env.HASH_SECRETS.SESSION_TOKEN),
       token_family: this._cryptoUtil.randomUUID(),
       is_revoked: false,
       user_id: data.user_id,

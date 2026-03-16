@@ -14,11 +14,10 @@ export class CreateAuthSessionService implements IService {
   execute = async (tsx: PrismaTsx | null, data: { user_id: string }) => {
     const dbClient = tsx ?? prisma;
 
-    const { token, refreshToken, sessionId } = this._makeRefreshToken();
+    const refreshToken = this._makeRefreshToken();
 
     const newAuthSession = this._authSessionFactory.create({
-      id: sessionId,
-      token: token,
+      refreshToken,
       user_id: data.user_id,
     });
 

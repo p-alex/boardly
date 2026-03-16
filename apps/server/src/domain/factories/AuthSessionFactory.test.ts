@@ -20,13 +20,13 @@ describe("AuthSessionFactory.ts (unit)", () => {
   it("returns a correct auth session", () => {
     const { authSessionFactory, clock, cryptoUtil } = createSut();
 
-    const result = authSessionFactory.create({ id: "id", token: "token", user_id: "user_id" });
+    const result = authSessionFactory.create({ refreshToken: "refreshToken", user_id: "user_id" });
 
     expect(cryptoUtil.hmacSHA256).toHaveBeenCalled();
     expect(cryptoUtil.randomUUID).toHaveBeenCalled();
 
     const expectedResult: AuthSession = {
-      id: "id",
+      id: "uuid",
       created_at: new Date(clock.now()),
       expires_at: new Date(clock.now() + SESSION_EXPIRES_AT),
       is_revoked: false,

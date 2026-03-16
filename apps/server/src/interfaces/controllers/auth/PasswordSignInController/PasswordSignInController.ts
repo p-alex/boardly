@@ -20,15 +20,16 @@ export class PasswordSignInController implements IController {
   ): Promise<ControllerResponse<PasswordSignInDtoResponseSchema>> => {
     const { email, password } = httpRequest.body;
 
-    const { refreshToken, shouldVerifyEmail } = await this._passwordSignInUsecase.execute({
-      email,
-      password,
-    });
+    const { refreshToken, sessionId, shouldVerifyEmail } =
+      await this._passwordSignInUsecase.execute({
+        email,
+        password,
+      });
 
     return {
       code: 200,
       result: { redirectTo: shouldVerifyEmail ? "/verify-email" : undefined },
-      cookies: [this._makeRefreshTokenCookie(refreshToken)],
+      cookies: [this._makeRefreshTokenCookie(sessionId, refreshToken)],
     };
   };
 }

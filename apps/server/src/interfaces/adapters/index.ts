@@ -1,5 +1,9 @@
 import { Request } from "express";
 import { extractAccessTokenFromRequest } from "../../utils/extractAccessTokenFromRequest.js";
+import {
+  AuthenticatedSession,
+  extractAuthenticatedSessionFromRequest,
+} from "../../utils/extractRefreshTokenFromRequest.js";
 
 export type HttpRequest<TBody = any, TParams = any, TQuery = any> = {
   body: TBody;
@@ -10,10 +14,23 @@ export type HttpRequest<TBody = any, TParams = any, TQuery = any> = {
   url: string;
   cookies: Record<string, string>;
   accessToken: string | null;
+  authenticatedSession: AuthenticatedSession | null;
   auth_user_id: string | null;
 };
 
 export function getHttpRequest(req: Request): HttpRequest {
+  console.log({
+    body: req.body,
+    params: req.params,
+    query: req.query,
+    client_ip: req.ip || req.socket.remoteAddress || "",
+    method: req.method,
+    url: req.url,
+    cookies: req.cookies,
+    accessToken: extractAccessTokenFromRequest(req),
+    authenticatedSession: extractAuthenticatedSessionFromRequest(req),
+    auth_user_id: null,
+  });
   return {
     body: req.body,
     params: req.params,
@@ -23,6 +40,7 @@ export function getHttpRequest(req: Request): HttpRequest {
     url: req.url,
     cookies: req.cookies,
     accessToken: extractAccessTokenFromRequest(req),
+    authenticatedSession: extractAuthenticatedSessionFromRequest(req),
     auth_user_id: null,
   };
 }

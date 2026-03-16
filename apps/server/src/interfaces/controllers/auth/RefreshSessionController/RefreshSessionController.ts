@@ -2,7 +2,6 @@ import { RefreshSessionResponseDto } from "@boardly/shared/dtos/auth";
 import refreshSessionUsecase, {
   RefreshSessionUsecase,
 } from "../../../../application/usecases/auth/RefreshSessionUsecase/RefreshSessionUsecase.js";
-import ForbiddenException from "../../../../exceptions/ForbiddenException.js";
 import makeRefreshTokenCookie from "../../../../infrastructure/auth/makeRefreshTokenCookie.js";
 import { HttpRequest } from "../../../adapters/index.js";
 import { ControllerResponse, IController } from "../PasswordSignUpController/index.js";
@@ -13,19 +12,18 @@ class RefreshSessionController implements IController {
   handle = async (
     httpRequest: HttpRequest,
   ): Promise<ControllerResponse<RefreshSessionResponseDto>> => {
-    const refreshToken = httpRequest.cookies?.refresh_token;
-
-    if (!refreshToken) throw new ForbiddenException("Invalid or expired token");
-
-    const result = await this._refreshSessionUsecase.execute({ refreshToken });
+    const { sessionId, refreshToken, refreshTokenExpiryMs, accessToken, userId, username } =
+      await this._refreshSessionUsecase.execute({
+        authenticatedSession: httpRequest.authenticatedSession,
+      });
 
     return {
       code: 200,
       result: {
-        accessToken: result.accessToken,
-        user: { id: result.user.id, username: result.user.username },
+        accessToken: accessToken,
+        user: { id: userId, username },
       },
-      cookies: [makeRefreshTokenCookie(result.refreshToken, result.refreshTokenExpiryMs)],
+      cookies: [makeRefreshTokenCookie(sessionId, refreshToken, refreshTokenExpiryMs)],
     };
   };
 }

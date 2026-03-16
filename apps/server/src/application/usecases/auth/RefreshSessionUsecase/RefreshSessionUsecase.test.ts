@@ -3,7 +3,6 @@ import { PrismaClient } from "../../../../../generated/prisma_client/client";
 import { RefreshSessionUsecase } from "./RefreshSessionUsecase";
 import type { PrismaTsx } from "../../../services";
 import { Clock, CryptoUtil } from "@boardly/shared/utils";
-import { refreshTokenFixture } from "../../../../__fixtures__";
 import ForbiddenException from "../../../../exceptions/ForbiddenException";
 import { UserBuilder, AuthSessionBuilder } from "../../../../__testEntityBuilders__";
 
@@ -37,7 +36,7 @@ function createSut() {
 
   const makeAccessToken = vi.fn().mockReturnValue("accessToken");
 
-  const makeRefreshToken = vi.fn().mockReturnValue(refreshTokenFixture);
+  const makeRefreshToken = vi.fn().mockReturnValue("refreshToken");
 
   const clock = {
     now: vi.fn().mockReturnValue(1000),
@@ -67,23 +66,13 @@ function createSut() {
 }
 
 describe("RefreshSessionUsecase.ts (unit)", () => {
-  it("throws ForbiddenException if the refresh token has an incorrect format", async () => {
-    const { refreshSessionUsecase } = createSut();
-
-    const promise = refreshSessionUsecase.execute({ refreshToken: "incorrectRefreshToken" });
-
-    await expect(promise).rejects.toThrow(ForbiddenException);
-
-    await expect(promise).rejects.toThrow("Invalid or expired session");
-  });
-
   it("throws ForbiddenException if no auth session exists", async () => {
     const { prismaTsx, refreshSessionUsecase } = createSut();
 
     (prismaTsx.authSession.findUnique as Mock).mockResolvedValue(null);
 
     const promise = refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     await expect(promise).rejects.toThrow(ForbiddenException);
@@ -99,7 +88,7 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
     );
 
     const promise = refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     await expect(promise).rejects.toThrow(ForbiddenException);
@@ -113,7 +102,7 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
     clock.now.mockReturnValue(authSession.expires_at.getTime() + 1000);
 
     const promise = refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     await expect(promise).rejects.toThrow(ForbiddenException);
@@ -135,7 +124,7 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
     timingSafeEqual.mockReturnValue(false);
 
     const promise = refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     await expect(promise).rejects.toThrow(ForbiddenException);
@@ -154,7 +143,7 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
     (prismaTsx.user.findUnique as Mock).mockResolvedValue(null);
 
     const promise = refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     await expect(promise).rejects.toThrow(ForbiddenException);
@@ -168,7 +157,7 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
     (prismaTsx.authSession.updateMany as Mock).mockResolvedValue({ count: 0 });
 
     const promise = refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     await expect(promise).rejects.toThrow(ForbiddenException);
@@ -180,7 +169,7 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
     const { prismaTsx, refreshSessionUsecase } = createSut();
 
     await refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     expect(prismaTsx.authSession.updateMany).toHaveBeenCalled();
@@ -191,7 +180,7 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
       createSut();
 
     const result = await refreshSessionUsecase.execute({
-      refreshToken: refreshTokenFixture.refreshToken,
+      authenticatedSession: { refreshToken: "refreshToken", sessionId: "sessionId" },
     });
 
     expect(makeAccessToken).toHaveBeenCalled();
@@ -199,9 +188,11 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
 
     const expectedResult: Awaited<ReturnType<RefreshSessionUsecase["execute"]>> = {
       accessToken: "accessToken",
-      refreshToken: refreshTokenFixture.refreshToken,
+      sessionId: authSession.id,
+      refreshToken: "refreshToken",
       refreshTokenExpiryMs: authSession.expires_at.getTime() - clock.now(),
-      user,
+      userId: user.id,
+      username: user.username,
     };
 
     expect(result).toEqual(expectedResult);

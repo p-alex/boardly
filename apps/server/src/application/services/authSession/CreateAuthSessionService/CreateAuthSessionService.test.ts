@@ -16,7 +16,7 @@ import { CreateAuthSessionService } from "./CreateAuthSessionService";
 import { prisma } from "../../../../prisma.js";
 import { PrismaTsx } from "../../index.js";
 
-const refreshToken = "sessionId" + "." + "token";
+const refreshToken = "token";
 
 describe("CreateAuthSessionService.ts (unit)", () => {
   let createAuthSessionService: CreateAuthSessionService;
@@ -26,11 +26,7 @@ describe("CreateAuthSessionService.ts (unit)", () => {
   let authSessionFactory: Mocked<AuthSessionFactory>;
 
   beforeEach(() => {
-    makeRefreshTokenMock = vi.fn().mockReturnValue({
-      refreshToken,
-      token: "token",
-      sessionId: "sessionId",
-    } as ReturnType<typeof makeRefreshToken>);
+    makeRefreshTokenMock = vi.fn().mockReturnValue("token");
 
     authSessionFactory = {
       create: vi.fn().mockReturnValue(authSessionFixture),
@@ -55,8 +51,7 @@ describe("CreateAuthSessionService.ts (unit)", () => {
     await createAuthSessionService.execute(null, { user_id: "user_id" });
 
     expect(authSessionFactory.create).toHaveBeenCalledWith({
-      id: "sessionId",
-      token: "token",
+      refreshToken: "token",
       user_id: "user_id",
     });
   });

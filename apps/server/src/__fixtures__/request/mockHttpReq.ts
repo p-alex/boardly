@@ -9,5 +9,6 @@ export const mockHttpRequest: HttpRequest = {
   url: "/url",
   cookies: {},
   accessToken: "Bearer accessToken",
+  authenticatedSession: { sessionId: "sessionId", refreshToken: "refreshToken" },
   auth_user_id: "auth_user_id",
 };

@@ -7,6 +7,7 @@ import { env } from "../../../../config.js";
 import timingSafeEqual from "../../../../timingSafeEqual.js";
 import makeRefreshToken from "../../../../infrastructure/auth/makeRefreshToken.js";
 import makeAccessToken from "../../../../infrastructure/auth/makeAccessToken.js";
+import { AuthenticatedSession } from "../../../../utils/extractRefreshTokenFromRequest.js";
 
 export class RefreshSessionUsecase implements IUsecase {
   constructor(
@@ -18,15 +19,13 @@ export class RefreshSessionUsecase implements IUsecase {
     private readonly _clock: Clock,
   ) {}
 
-  execute = async (data: { refreshToken: string }) => {
+  execute = async (data: { authenticatedSession: AuthenticatedSession | null }) => {
     return await this._prisma.$transaction(async (tsx) => {
-      const parts = data.refreshToken.split(".");
+      if (!data.authenticatedSession) throw new ForbiddenException("No refresh token provided");
 
-      if (parts.length !== 2) throw new ForbiddenException("Invalid or expired session");
-
-      const [sessionId, token] = parts;
-
-      const authSession = await tsx.authSession.findUnique({ where: { id: sessionId } });
+      const authSession = await tsx.authSession.findUnique({
+        where: { id: data.authenticatedSession.sessionId },
+      });
 
       if (!authSession) throw new ForbiddenException("Invalid or expired session");
 
@@ -38,7 +37,10 @@ export class RefreshSessionUsecase implements IUsecase {
       }
 
       const isValidToken = this._timingSafeEqual(
-        this._cryptoUtil.hmacSHA256(token, env.HASH_SECRETS.SESSION_TOKEN),
+        this._cryptoUtil.hmacSHA256(
+          data.authenticatedSession.refreshToken,
+          env.HASH_SECRETS.SESSION_TOKEN,
+        ),
         authSession.token_hash,
       );
 
@@ -54,16 +56,13 @@ export class RefreshSessionUsecase implements IUsecase {
 
       if (!user) throw new ForbiddenException("Invalid or expired session");
 
-      const newRefreshToken = this._makeRefreshToken(authSession.id);
+      const newRefreshToken = this._makeRefreshToken();
 
       const newAccessToken = this._makeAccessToken({ id: authSession.user_id });
 
       const refreshResult = await tsx.authSession.updateMany({
         data: {
-          token_hash: this._cryptoUtil.hmacSHA256(
-            newRefreshToken.token,
-            env.HASH_SECRETS.SESSION_TOKEN,
-          ),
+          token_hash: this._cryptoUtil.hmacSHA256(newRefreshToken, env.HASH_SECRETS.SESSION_TOKEN),
         },
         where: { id: authSession.id, token_hash: authSession.token_hash },
       });
@@ -71,10 +70,12 @@ export class RefreshSessionUsecase implements IUsecase {
       if (refreshResult.count === 0) throw new ForbiddenException("Invalid or expired session");
 
       return {
-        refreshToken: newRefreshToken.refreshToken,
+        refreshToken: newRefreshToken,
+        sessionId: authSession.id,
         accessToken: newAccessToken,
         refreshTokenExpiryMs: authSession.expires_at.getTime() - this._clock.now(),
-        user,
+        userId: user.id,
+        username: user.username,
       };
     });
   };

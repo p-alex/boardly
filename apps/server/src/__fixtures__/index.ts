@@ -6,7 +6,6 @@ import * as userPasswordAuthFixtures from "./userPasswordAuth/index.js";
 import { cookieFixture } from "./cookieFixture.js";
 import { authSessionFixture } from "./authSessionFixture.js";
 
-import { refreshTokenFixture } from "./refreshTokenFixture.js";
 import { accessTokenPayloadFixture } from "./accessTokenFixture.js";
 
 export {
@@ -17,6 +16,5 @@ export {
   userPasswordAuthFixtures,
   cookieFixture,
   authSessionFixture,
-  refreshTokenFixture,
   accessTokenPayloadFixture,
 };

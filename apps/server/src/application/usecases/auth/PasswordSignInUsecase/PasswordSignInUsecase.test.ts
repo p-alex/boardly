@@ -111,6 +111,7 @@ describe("PasswordSignInUsecase", () => {
 
     expect(result).toEqual({
       refreshToken: "",
+      sessionId: "",
       shouldVerifyEmail: true,
     });
   });
@@ -138,6 +139,7 @@ describe("PasswordSignInUsecase", () => {
 
     expect(result).toEqual({
       refreshToken: "refreshToken",
+      sessionId: authSessionFixture.id,
       shouldVerifyEmail: false,
     });
   });

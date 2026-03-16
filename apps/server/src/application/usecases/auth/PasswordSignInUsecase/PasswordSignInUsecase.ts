@@ -45,7 +45,7 @@ export class PasswordSignInUsecase implements IUsecase {
         );
 
       if (!user.email_verified) {
-        return { refreshToken: "", shouldVerifyEmail: true };
+        return { refreshToken: "", sessionId: "", shouldVerifyEmail: true };
       }
 
       const userPasswordAuth = await tsx.userPasswordAuth.findUnique({
@@ -68,11 +68,11 @@ export class PasswordSignInUsecase implements IUsecase {
         userPasswordAuth,
       });
 
-      const { refreshToken } = await this._createAuthSessionService.execute(tsx, {
+      const { refreshToken, authSession } = await this._createAuthSessionService.execute(tsx, {
         user_id: user.id,
       });
 
-      return { refreshToken, shouldVerifyEmail: false };
+      return { refreshToken, sessionId: authSession.id, shouldVerifyEmail: false };
     });
   };
 }
