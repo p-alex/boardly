@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../../config.js";
-import { User } from "../../../generated/prisma_client/client.js";
+import { AuthSession, User } from "../../../generated/prisma_client/client.js";
 
 export type JwtTokenData = { iat: number; exp: number; aud: string; iss: string };
 
@@ -8,6 +8,7 @@ export type AccessTokenData = AccessTokenPayload & JwtTokenData;
 
 export type AccessTokenPayload = {
   id: User["id"];
+  sessionId: AuthSession["id"];
 };
 
 export const ACCESS_TOKEN_ALGORITHM = "HS256";

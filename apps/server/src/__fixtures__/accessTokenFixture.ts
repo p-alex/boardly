@@ -10,4 +10,5 @@ export const accessTokenPayloadFixture: AccessTokenData = {
   exp: 2000,
   iat: 1000,
   iss: ACCESS_TOKEN_ISSUER,
+  sessionId: "sessionId",
 };

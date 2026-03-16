@@ -1,4 +1,5 @@
 import type { Request } from "express";
+import { CustomRequest } from "../../interfaces/adapters/index.js";
 
 export const mockReq = {
   url: "/url",
@@ -11,4 +12,5 @@ export const mockReq = {
   params: {},
   query: {},
   headers: {} as Request["headers"],
-} as unknown as Request;
+  custom: { authUser: { id: "id", sessionId: "sessionId" } },
+} as unknown as CustomRequest;

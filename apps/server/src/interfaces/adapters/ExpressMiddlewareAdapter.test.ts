@@ -47,4 +47,25 @@ describe("ExpressMiddlewareAdapter.ts (unit)", () => {
     expect(mockRes.status).toHaveBeenCalled();
     expect(mockRes.json).toHaveBeenCalled();
   });
+
+  it("should set req.custom.authUser if updatedHttpRequest is returned", async () => {
+    const authUser = { id: "123" };
+
+    handlerMock.mockResolvedValue({
+      isOk: true,
+      updatedHttpRequest: {
+        authUser,
+      },
+    } as MiddlewareResponse);
+
+    const handler = expressMiddlewareAdapter.adapt(mockMiddleware.setup());
+
+    await handler(mockReq, mockRes, nextFuncMock);
+
+    expect(mockReq.custom).toEqual({
+      authUser,
+    });
+
+    expect(nextFuncMock).toHaveBeenCalled();
+  });
 });

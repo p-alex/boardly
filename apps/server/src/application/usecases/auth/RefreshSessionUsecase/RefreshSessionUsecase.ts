@@ -58,7 +58,10 @@ export class RefreshSessionUsecase implements IUsecase {
 
       const newRefreshToken = this._makeRefreshToken();
 
-      const newAccessToken = this._makeAccessToken({ id: authSession.user_id });
+      const newAccessToken = this._makeAccessToken({
+        id: authSession.user_id,
+        sessionId: authSession.id,
+      });
 
       const refreshResult = await tsx.authSession.updateMany({
         data: {

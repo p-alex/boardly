@@ -3,7 +3,6 @@ import {
   ACCESS_TOKEN_AUDIENCE,
   ACCESS_TOKEN_ISSUER,
   AccessTokenData,
-  AccessTokenPayload,
 } from "../../infrastructure/auth/makeAccessToken.js";
 import { verifyJwt } from "../../infrastructure/auth/verifyJwt.js";
 import { HttpRequest } from "../../interfaces/adapters/index.js";
@@ -33,9 +32,12 @@ class AuthShield implements IMiddleware {
       if (!tokenPayload || tokenPayload.aud !== ACCESS_TOKEN_AUDIENCE)
         throw new UnauthorizedException("Invalid or expired access token");
 
-      httpRequest.auth_user_id = tokenPayload.id;
+      const updatedHttpRequest: HttpRequest = {
+        ...httpRequest,
+        authUser: { id: tokenPayload.id, sessionId: tokenPayload.sessionId },
+      };
 
-      return { isOk: true };
+      return { isOk: true, updatedHttpRequest };
     };
   };
 }

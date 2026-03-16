@@ -1,14 +1,14 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import {
   CookieConfigType,
   IController,
 } from "../controllers/auth/PasswordSignUpController/index.js";
 import handleServerError from "../../handleServerError.js";
-import { getHttpRequest } from "./index.js";
+import { CustomRequest, getHttpRequest } from "./index.js";
 
 export class ExpressControllerAdapter {
   adapt = (controller: IController) => {
-    return async (req: Request, res: Response) => {
+    return async (req: CustomRequest, res: Response) => {
       try {
         const { result, code, cookies } = await controller.handle(getHttpRequest(req));
 

@@ -58,7 +58,7 @@ describe("AuthShield.ts (unit)", () => {
     await expect(handler(requestFixtures.mockHttpRequest)).rejects.toThrow(UnauthorizedException);
   });
 
-  it("sets auth_user_id and returns isOk set to true", async () => {
+  it("returns isOk set to true if verfication passed", async () => {
     const { authShield, httpReqMock } = createSut();
 
     (jwtVerifier.verifyJwt as Mock).mockReturnValue({ ...accessTokenPayloadFixture });
@@ -67,8 +67,9 @@ describe("AuthShield.ts (unit)", () => {
 
     const result = await handler(httpReqMock);
 
-    expect(httpReqMock.auth_user_id).toBe(accessTokenPayloadFixture.id);
-
-    expect(result).toEqual({ isOk: true });
+    expect(result).toEqual({
+      isOk: true,
+      updatedHttpRequest: { ...httpReqMock, authUser: { id: "id", sessionId: "sessionId" } },
+    });
   });
 });

@@ -10,7 +10,7 @@ vi.mock("jsonwebtoken", () => ({
 }));
 
 describe("makeAccessToken", () => {
-  const payload = { id: "user-123" };
+  const payload = { id: "user-123", sessionId: "session-123" };
 
   beforeEach(() => {
     vi.clearAllMocks();

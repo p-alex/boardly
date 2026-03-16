@@ -4,6 +4,15 @@ import {
   AuthenticatedSession,
   extractAuthenticatedSessionFromRequest,
 } from "../../utils/extractRefreshTokenFromRequest.js";
+import { AuthSession, User } from "../../../generated/prisma_client/client.js";
+
+export type AuthUser = { id: User["id"]; sessionId: AuthSession["id"] };
+
+export interface CustomRequest extends Request {
+  custom?: {
+    authUser?: AuthUser;
+  };
+}
 
 export type HttpRequest<TBody = any, TParams = any, TQuery = any> = {
   body: TBody;
@@ -15,10 +24,10 @@ export type HttpRequest<TBody = any, TParams = any, TQuery = any> = {
   cookies: Record<string, string>;
   accessToken: string | null;
   authenticatedSession: AuthenticatedSession | null;
-  auth_user_id: string | null;
+  authUser: AuthUser | null;
 };
 
-export function getHttpRequest(req: Request): HttpRequest {
+export function getHttpRequest(req: CustomRequest): HttpRequest {
   return {
     body: req.body,
     params: req.params,
@@ -29,6 +38,6 @@ export function getHttpRequest(req: Request): HttpRequest {
     cookies: req.cookies,
     accessToken: extractAccessTokenFromRequest(req),
     authenticatedSession: extractAuthenticatedSessionFromRequest(req),
-    auth_user_id: null,
+    authUser: req?.custom?.authUser ?? null,
   };
 }
