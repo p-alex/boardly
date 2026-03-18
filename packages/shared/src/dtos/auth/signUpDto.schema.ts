@@ -1,5 +1,6 @@
 import { object } from "zod/v4-mini";
-import { emailSchema, passwordSchema, usernameSchema } from "../../fieldValidation/user.js";
+import { emailSchema, usernameSchema } from "../../fieldValidation/user.js";
+import { passwordSchema } from "../../fieldValidation/userPasswordAuth.js";
 
 const signUpRequestDtoSchema = object({
   body: object({

@@ -14,11 +14,3 @@ export const emailSchema = email({ error: "Email must be valid" }).check(
   maxLength(254, "Email must be at most 254 characters long"),
   minLength(6, "Email must be at least 6 characters long"),
 );
-
-export const passwordSchema = string().check(
-  minLength(12, "Password must be between 12-64 characters long"),
-  maxLength(64, "Password must be between 12-64 characters long"),
-  refine((password) => !isCommonlyUsedPassword(password), {
-    error: "Password is too common. Please try a different one.",
-  }),
-);

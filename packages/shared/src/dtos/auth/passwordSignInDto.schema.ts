@@ -1,10 +1,11 @@
-import { object, string, minLength, maxLength, optional } from "zod/v4-mini";
+import { object, string, optional } from "zod/v4-mini";
 import { emailSchema } from "../../fieldValidation/user.js";
+import { simplePasswordSchema } from "../../fieldValidation/userPasswordAuth.js";
 
 export const passwordSignInDtoRequestSchema = object({
   body: object({
     email: emailSchema,
-    password: string().check(minLength(12), maxLength(64)),
+    password: simplePasswordSchema,
   }),
 });
 
