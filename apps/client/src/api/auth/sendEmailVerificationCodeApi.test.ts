@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import axios from "axios";
 import sendEmailVerificationCodeApi from "./sendEmailVerificationCodeApi";
 import type { SendVerificationCodeResponseDto } from "@boardly/shared/dtos/verificationCode";
-import { SendVerificationCodeFormSchema } from "../components/forms/SendVerificationCodeForm/SendVerificationCodeForm.schema";
+import { SendVerificationCodeFormSchema } from "../../components/forms/SendVerificationCodeForm/SendVerificationCodeForm.schema";
 
 vi.mock("axios");
 

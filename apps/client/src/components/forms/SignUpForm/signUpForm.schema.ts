@@ -1,10 +1,10 @@
 import { string, object, superRefine } from "zod/v4-mini";
-import { userFieldValidations } from "@boardly/shared/fieldValidations";
+import { userFieldValidations, userPasswordAuth } from "@boardly/shared/fieldValidations";
 
 const signUpFormSchema = object({
   username: userFieldValidations.usernameSchema,
   email: userFieldValidations.emailSchema,
-  password: userFieldValidations.passwordSchema,
+  password: userPasswordAuth.passwordSchema,
   confirmPassword: string(),
 }).check(
   superRefine((data, ctx) => {

@@ -3,13 +3,13 @@ import { Mock, vi } from "vitest";
 import SignUpForm from "./SignUpForm";
 import userEvent from "@testing-library/user-event";
 
-import signUpApi from "../../../api/signUpApi";
+import signUpApi from "../../../api/auth/signUpApi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { AxiosError } from "axios";
 import { MemoryRouter } from "react-router-dom";
 
-vi.mock("../../../api/signUpApi", () => ({ default: vi.fn().mockResolvedValue(null) }));
+vi.mock("../../../api/auth/signUpApi", () => ({ default: vi.fn().mockResolvedValue(null) }));
 
 function createWrapper() {
   const queryClient = new QueryClient({

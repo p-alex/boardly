@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import VerifiyEmailForm from "./VerifiyEmailForm";
 import { Mock, vi } from "vitest";
-import verifyEmailApi from "../../../api/verifyEmailApi";
+import verifyEmailApi from "../../../api/auth/verifyEmailApi";
 import { AxiosError, AxiosResponse } from "axios";
 
 const navigateMock = vi.fn();
@@ -19,7 +19,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../../../api/verifyEmailApi", () => ({ default: vi.fn() }));
+vi.mock("../../../api/auth/verifyEmailApi", () => ({ default: vi.fn() }));
 
 async function fillValid() {
   const codeField = screen.getByLabelText(/code/i);

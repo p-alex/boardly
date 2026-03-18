@@ -6,7 +6,7 @@ import Button from "../../Button/Button";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { useMutation } from "@tanstack/react-query";
-import signUpApi from "../../../api/signUpApi";
+import signUpApi from "../../../api/auth/signUpApi";
 import { ErrorTraingleIcon } from "../../../svgs";
 
 const serverErrorToFieldMap: Record<string, keyof SignUpFormSchema> = {

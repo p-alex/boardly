@@ -8,7 +8,7 @@ import {
   SendVerificationCodeFormSchema,
 } from "./SendVerificationCodeForm.schema";
 import { useMutation } from "@tanstack/react-query";
-import sendEmailVerificationCodeApi from "../../../api/sendEmailVerificationCodeApi";
+import sendEmailVerificationCodeApi from "../../../api/auth/sendEmailVerificationCodeApi";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";

@@ -4,7 +4,6 @@ import SignUpForm from "../components/forms/SignUpForm/SignUpForm";
 import { Link, useNavigate } from "react-router-dom";
 import LargeLogo from "../components/LargeLogo";
 import ReCaptchaFormMessage from "../components/ReCaptchaFormMessage";
-import { useEffect } from "react";
 
 function SignUpPage() {
   const navigate = useNavigate();
@@ -12,24 +11,6 @@ function SignUpPage() {
   useHead({
     title: "Create your free account | Boardly",
   });
-
-  const testRequest = async () => {
-    const response = await fetch("http://localhost:5000/auth/password-sign-in", {
-      method: "post",
-      body: JSON.stringify({ email: "email@email.com", password: "!Qapl12bn12!" }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    const json = await response.json();
-
-    if (json?.redirectTo) navigate("/verify-email");
-  };
-
-  useEffect(() => {
-    testRequest();
-  }, []);
 
   return (
     <CenterLayout>

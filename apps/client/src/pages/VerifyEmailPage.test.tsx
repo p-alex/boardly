@@ -2,14 +2,14 @@ import { describe, it, vi, beforeEach, Mock } from "vitest";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createHead, UnheadProvider } from "@unhead/react/client";
-import sendEmailVerificationCodeApi from "../api/sendEmailVerificationCodeApi";
-import verifyEmailApi from "../api/verifyEmailApi";
+import sendEmailVerificationCodeApi from "../api/auth/sendEmailVerificationCodeApi";
+import verifyEmailApi from "../api/auth/verifyEmailApi";
 import { render, screen } from "@testing-library/react";
 import VerifyEmailPage from "./VerifyEmailPage";
 import userEvent from "@testing-library/user-event";
 
-vi.mock("../api/sendEmailVerificationCodeApi", () => ({ default: vi.fn() }));
-vi.mock("../api/verifyEmailApi", () => ({ default: vi.fn() }));
+vi.mock("../api/auth/sendEmailVerificationCodeApi", () => ({ default: vi.fn() }));
+vi.mock("../api/auth/verifyEmailApi", () => ({ default: vi.fn() }));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<any>("react-router-dom");

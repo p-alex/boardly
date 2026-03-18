@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { VerifyEmailFormSchema, verifyEmailFormSchema } from "./verifyEmailForm.schema";
 import Button from "../../Button/Button";
 import { useMutation } from "@tanstack/react-query";
-import verifyEmailApi from "../../../api/verifyEmailApi";
+import verifyEmailApi from "../../../api/auth/verifyEmailApi";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 import { verificationCodeFieldValidations } from "@boardly/shared/fieldValidations";

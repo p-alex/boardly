@@ -4,12 +4,12 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import sendEmailVerificationCodeApi from "../../../api/sendEmailVerificationCodeApi";
+import sendEmailVerificationCodeApi from "../../../api/auth/sendEmailVerificationCodeApi";
 import { Mock, vi } from "vitest";
 import { AxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
 
-vi.mock("../../../api/sendEmailVerificationCodeApi", () => ({ default: vi.fn() }));
+vi.mock("../../../api/auth/sendEmailVerificationCodeApi", () => ({ default: vi.fn() }));
 
 import SendEmailVerificationCodeForm from "./SendVerificationCodeForm";
 

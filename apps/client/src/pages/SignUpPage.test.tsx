@@ -5,11 +5,10 @@ import SignUpPage from "./SignUpPage";
 import { createHead, UnheadProvider } from "@unhead/react/client";
 import { useNavigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-import signUpApi from "../api/signUpApi";
 import userEvent from "@testing-library/user-event";
+import signUpApi from "../api/auth/signUpApi";
 
-vi.mock("../api/signUpApi", () => ({ default: vi.fn() }));
+vi.mock("../api/auth/signUpApi", () => ({ default: vi.fn() }));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<any>("react-router-dom");
