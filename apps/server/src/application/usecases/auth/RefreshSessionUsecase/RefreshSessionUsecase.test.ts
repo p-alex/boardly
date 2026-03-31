@@ -197,4 +197,13 @@ describe("RefreshSessionUsecase.ts (unit)", () => {
 
     expect(result).toEqual(expectedResult);
   });
+
+  it("throws ForbiddenException if no authenticated session exists", async () => {
+    const { refreshSessionUsecase, authSession, user, makeAccessToken, makeRefreshToken, clock } =
+      createSut();
+
+    await expect(refreshSessionUsecase.execute({ authenticatedSession: null })).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
 });
