@@ -8,12 +8,10 @@ import { useMutation } from "@tanstack/react-query";
 import signInApi from "../../../api/auth/signInApi";
 import { isAxiosError } from "axios";
 import { ServerErrorResponseDto } from "@boardly/shared/dtos/server";
+import { useAuthContext } from "../../../context/AuthContext/AuthContextProvider";
 
-interface Props {
-  onSuccess: () => void;
-}
-
-function SignInForm(props: Props) {
+function SignInForm() {
+  const authContext = useAuthContext();
   const form = useForm<SignInFormSchema>({ resolver: zodResolver(signInFormSchema), mode: "all" });
 
   const mutation = useMutation({
@@ -27,8 +25,12 @@ function SignInForm(props: Props) {
         form.setError("root", { message: "Something went wrong. Please try again later." });
       }
     },
-    onSuccess: () => {
-      props.onSuccess();
+    onSuccess: (data) => {
+      if (data.auth)
+        authContext.login({
+          user: { id: data.auth.id, username: data.auth.username },
+          accessToken: data.auth.accessToken,
+        });
       form.reset();
     },
   });
@@ -36,8 +38,8 @@ function SignInForm(props: Props) {
   const submit = async (data: SignInFormSchema) => {
     try {
       await mutation.mutateAsync(data);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(error.message);
     }
   };
 

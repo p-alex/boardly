@@ -1,11 +1,9 @@
 import { createContext, useContext, useState } from "react";
 
-interface IAuthContext {
+export interface IAuthContext {
   authData: AuthData;
   login: (data: { user: { id: string; username: string }; accessToken: string }) => void;
   logout: () => void;
-  toggleIsRefreshing: () => void;
-  isRefreshing: boolean;
 }
 
 export const AuthContext = createContext<IAuthContext | undefined>(undefined);
@@ -23,19 +21,14 @@ const initialAuthData: AuthData = {
 export function AuthContextProvider(props: { children: React.ReactNode }) {
   const [authData, setAuthData] = useState<AuthData>(initialAuthData);
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
   const login = (data: { user: AuthData["user"]; accessToken: string }) => {
-    if (isRefreshing) return;
     setAuthData(data);
   };
 
   const logout = () => setAuthData(initialAuthData);
 
-  const toggleIsRefreshing = () => setIsRefreshing((prev) => !prev);
-
   return (
-    <AuthContext.Provider value={{ authData, login, logout, toggleIsRefreshing, isRefreshing }}>
+    <AuthContext.Provider value={{ authData, login, logout }}>
       {props.children}
     </AuthContext.Provider>
   );

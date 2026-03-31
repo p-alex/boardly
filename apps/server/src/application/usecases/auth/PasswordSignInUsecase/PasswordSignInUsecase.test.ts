@@ -53,6 +53,8 @@ function createSut() {
 
   const getMinutesUntilDate = vi.fn().mockReturnValue(10);
 
+  const makeAccessToken = vi.fn().mockReturnValue("accessToken");
+
   const usecase = new PasswordSignInUsecase(
     prisma,
     userEmailFinderService,
@@ -61,6 +63,7 @@ function createSut() {
     createAuthSessionService,
     userLockChecker,
     getMinutesUntilDate,
+    makeAccessToken,
   );
 
   return {
@@ -101,7 +104,6 @@ describe("PasswordSignInUsecase", () => {
 
   it("returns verify flag when email not verified", async () => {
     const { usecase, userEmailFinderService } = createSut();
-
     userEmailFinderService.execute.mockResolvedValue({
       user: new UserBuilder().withUnverifiedEmail().build(),
       foundWithInactiveSecret: false,
@@ -110,6 +112,7 @@ describe("PasswordSignInUsecase", () => {
     const result = await usecase.execute(input);
 
     expect(result).toEqual({
+      auth: null,
       refreshToken: "",
       sessionId: "",
       shouldVerifyEmail: true,
@@ -138,6 +141,11 @@ describe("PasswordSignInUsecase", () => {
     const result = await usecase.execute(input);
 
     expect(result).toEqual({
+      auth: {
+        id: "id",
+        username: "username",
+        accessToken: "accessToken",
+      },
       refreshToken: "refreshToken",
       sessionId: authSessionFixture.id,
       shouldVerifyEmail: false,

@@ -4,6 +4,7 @@ import userLockChecker, {
 } from "../../../../domain/services/user/UserLockChecker/UserLockChecker.js";
 import LockException from "../../../../exceptions/LockException.js";
 import ValidationException from "../../../../exceptions/ValidationException.js";
+import makeAccessToken from "../../../../infrastructure/auth/makeAccessToken.js";
 import { prisma } from "../../../../prisma.js";
 import getMinutesUntilDate from "../../../../utils/getMinutesUntilDate.js";
 import rotatePasswordPepperService, {
@@ -29,6 +30,7 @@ export class PasswordSignInUsecase implements IUsecase {
     private readonly _createAuthSessionService: CreateAuthSessionService,
     private readonly _userLockChecker: UserLockChecker,
     private readonly _getMinutesUntilDate: typeof getMinutesUntilDate,
+    private readonly _makeAccessToken: typeof makeAccessToken,
   ) {}
 
   execute = async (data: { email: string; password: string }) => {
@@ -45,7 +47,7 @@ export class PasswordSignInUsecase implements IUsecase {
         );
 
       if (!user.email_verified) {
-        return { refreshToken: "", sessionId: "", shouldVerifyEmail: true };
+        return { auth: null, refreshToken: "", sessionId: "", shouldVerifyEmail: true };
       }
 
       const userPasswordAuth = await tsx.userPasswordAuth.findUnique({
@@ -72,7 +74,14 @@ export class PasswordSignInUsecase implements IUsecase {
         user_id: user.id,
       });
 
-      return { refreshToken, sessionId: authSession.id, shouldVerifyEmail: false };
+      const accessToken = this._makeAccessToken({ id: user.id, sessionId: authSession.id });
+
+      return {
+        auth: { id: user.id, username: user.username, accessToken },
+        refreshToken,
+        sessionId: authSession.id,
+        shouldVerifyEmail: false,
+      };
     });
   };
 }
@@ -85,6 +94,7 @@ const passwordSignInUsecase = new PasswordSignInUsecase(
   createAuthSessionService,
   userLockChecker,
   getMinutesUntilDate,
+  makeAccessToken,
 );
 
 export default passwordSignInUsecase;

@@ -10,7 +10,6 @@ function TestComponent() {
       <p>{authContext.authData.user.id}</p>
       <p>{authContext.authData.user.username}</p>
       <p>{authContext.authData.accessToken}</p>
-      <p>{JSON.stringify(authContext.isRefreshing)}</p>
       <button
         onClick={() =>
           authContext.login({
@@ -22,7 +21,6 @@ function TestComponent() {
         login
       </button>
       <button onClick={authContext.logout}>logout</button>
-      <button onClick={authContext.toggleIsRefreshing}>toggle refreshing</button>
     </div>
   );
 }
@@ -62,35 +60,5 @@ describe("AuthContextProvider.tsx (unit)", () => {
 
   it("throws Error if the component is not wrapped inside AuthContextProvider", () => {
     expect(() => render(<TestComponent />)).toThrow("No auth context.");
-  });
-
-  it("toggles is refreshing", async () => {
-    render(<TestComponent />, { wrapper });
-
-    const refreshToggle = screen.getByRole("button", { name: /toggle refreshing/i });
-
-    await userEvent.click(refreshToggle);
-
-    expect(screen.getByText("true")).toBeInTheDocument();
-
-    await userEvent.click(refreshToggle);
-
-    expect(screen.getByText("false")).toBeInTheDocument();
-  });
-
-  it("should not log user in while refreshing", async () => {
-    render(<TestComponent />, { wrapper });
-
-    const refreshToggle = screen.getByRole("button", { name: /toggle refreshing/i });
-
-    await userEvent.click(refreshToggle);
-
-    const loginButton = screen.getByRole("button", { name: /login/i });
-
-    await userEvent.click(loginButton);
-
-    expect(screen.queryByText("id")).not.toBeInTheDocument();
-    expect(screen.queryByText("username")).not.toBeInTheDocument();
-    expect(screen.queryByText("accessToken")).not.toBeInTheDocument();
   });
 });

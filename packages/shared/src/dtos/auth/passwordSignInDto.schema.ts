@@ -1,4 +1,4 @@
-import { object, string, optional } from "zod/v4-mini";
+import { object, string, optional, nullable } from "zod/v4-mini";
 import { emailSchema } from "../../fieldValidation/user.js";
 import { simplePasswordSchema } from "../../fieldValidation/userPasswordAuth.js";
 
@@ -10,6 +10,13 @@ export const passwordSignInDtoRequestSchema = object({
 });
 
 export const passwordSignInDtoResponseSchema = object({
+  auth: nullable(
+    object({
+      id: string(),
+      username: string(),
+      accessToken: string(),
+    }),
+  ),
   redirectTo: optional(string()),
 });
 
